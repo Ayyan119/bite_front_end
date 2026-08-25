@@ -4,11 +4,7 @@ import 'package:bite_front_end/app.dart';
 
 void main() {
   testWidgets('App renders welcome text', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: BiteApp(),
-      ),
-    );
+    await tester.pumpWidget(const ProviderScope(child: BiteApp()));
 
     expect(find.text('Welcome to Bite'), findsOneWidget);
   });

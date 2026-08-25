@@ -2,6 +2,9 @@
 
 This document outlines the detailed roadmap, feature breakdown, task dependencies, data models, state management, and implementation sequence for the **Bite Frontend** Flutter application based on the [Bite API Specification](file:///home/jiggra/BiteFrontEnd/api_docs.md).
 
+* **Public FastAPI Base URL**: `http://13.51.160.123:8000/api/v1`
+* **Public OpenAPI / Docs URL**: `http://13.51.160.123:8000/docs`
+
 ---
 
 ## 🏗 Architectural Blueprint
