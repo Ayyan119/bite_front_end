@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/bite_logo.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../chat/presentation/screens/chat_screen.dart';
 import '../../../dashboard/presentation/screens/dashboard_screen.dart';
 import '../../../meals/presentation/screens/meal_ingestion_screen.dart';
 
@@ -19,10 +20,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final List<Widget> _screens = const [
     DashboardScreen(),
     MealIngestionScreen(),
-    _PlaceholderTab(
-      title: 'AI Nutrition Assistant',
-      icon: Icons.chat_bubble_outline,
-    ),
+    ChatScreen(),
     _PlaceholderTab(title: 'User Profile & Goals', icon: Icons.person_outline),
   ];
 

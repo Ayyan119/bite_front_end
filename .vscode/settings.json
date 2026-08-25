@@ -1,0 +1,13 @@
+{
+  "dart.flutterSdkPath": "/home/jiggra/development/flutter",
+  "dart.defaultRunTarget": "lib/main.dart",
+  "editor.formatOnSave": true,
+  "[dart]": {
+    "editor.formatOnSave": true,
+    "editor.selectionHighlight": false,
+    "editor.suggest.snippetsPreventQuickSuggestions": false,
+    "editor.suggestImports": true,
+    "editor.tabCompletion": "on",
+    "editor.wordBasedSuggestions": "off"
+  }
+}
