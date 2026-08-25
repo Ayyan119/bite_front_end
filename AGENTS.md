@@ -149,9 +149,12 @@ Prefer `Expanded`, `Flexible`, `LayoutBuilder`, `MediaQuery` (when appropriate),
 
 ## 8. Theme and Design System
 
+* **Figma Design Reference**: [Food App Design UI Template](https://www.figma.com/design/mBcFjXX6td7789R2bmxg9J/Food-App-Design-UI-Template--Community-?node-id=0-1&t=wFrkBDvTZKdmIH6v-1)
+
 Do not scatter colors, text styles, spacing, or dimensions throughout widgets. Use the project's centralized theme/design system (`ThemeData`, `ColorScheme`, `TextTheme`, `ThemeExtension`).
 
 Create reusable design constants only when they provide real value. Do not hardcode arbitrary colors when a theme value exists.
+
 
 ## 9. Animations
 
