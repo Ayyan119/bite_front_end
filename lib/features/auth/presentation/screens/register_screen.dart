@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_radius.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/bite_logo.dart';
 import '../../data/models/register_request_model.dart';
 import '../providers/auth_provider.dart';
@@ -107,10 +111,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               )
             : null,
         title: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.xs,
+          ),
           decoration: BoxDecoration(
             color: AppColors.lightSurface,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: AppRadius.pillBorder,
             border: Border.all(color: AppColors.inputBorder),
           ),
           child: const BiteLogo(size: 32, showText: true),
@@ -121,15 +128,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(
-              horizontal: 24.0,
-              vertical: 16.0,
+              horizontal: AppSpacing.xxl,
+              vertical: AppSpacing.lg,
             ),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 480),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // High Contrast Step Indicator
+                  // Step Progress Indicator
                   Row(
                     children: [
                       _StepProgressPill(
@@ -138,14 +145,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         isActive: _currentStep >= 0,
                         isCurrent: _currentStep == 0,
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       _StepProgressPill(
                         stepNumber: 2,
                         label: 'Body',
                         isActive: _currentStep >= 1,
                         isCurrent: _currentStep == 1,
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       _StepProgressPill(
                         stepNumber: 3,
                         label: 'Goals',
@@ -154,62 +161,52 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.xxl),
 
-                  // White Form Card
-                  Container(
-                    padding: const EdgeInsets.all(28.0),
-                    decoration: BoxDecoration(
-                      color: AppColors.lightSurface,
-                      borderRadius: BorderRadius.circular(28),
-                      border: Border.all(
-                        color: AppColors.inputBorder,
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.08),
-                          blurRadius: 24,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
+                  // High-Contrast White Card Container
+                  AppCard(
+                    padding: const EdgeInsets.all(AppSpacing.xxl),
                     child: Form(
                       key: _formKey,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          if (_currentStep == 0)
-                            RegisterStepAccount(
-                              emailController: _emailController,
-                              passwordController: _passwordController,
-                              nameController: _nameController,
-                            )
-                          else if (_currentStep == 1)
-                            RegisterStepBody(
-                              ageController: _ageController,
-                              heightController: _heightController,
-                              weightController: _weightController,
-                              gender: _gender,
-                              onGenderChanged: (val) =>
-                                  setState(() => _gender = val),
-                            )
-                          else
-                            RegisterStepGoals(
-                              activityLevel: _activityLevel,
-                              onActivityLevelChanged: (val) =>
-                                  setState(() => _activityLevel = val),
-                              primaryGoal: _primaryGoal,
-                              onPrimaryGoalChanged: (val) =>
-                                  setState(() => _primaryGoal = val),
-                            ),
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 250),
+                            child: _currentStep == 0
+                                ? RegisterStepAccount(
+                                    key: const ValueKey(0),
+                                    emailController: _emailController,
+                                    passwordController: _passwordController,
+                                    nameController: _nameController,
+                                  )
+                                : _currentStep == 1
+                                ? RegisterStepBody(
+                                    key: const ValueKey(1),
+                                    ageController: _ageController,
+                                    heightController: _heightController,
+                                    weightController: _weightController,
+                                    gender: _gender,
+                                    onGenderChanged: (val) =>
+                                        setState(() => _gender = val),
+                                  )
+                                : RegisterStepGoals(
+                                    key: const ValueKey(2),
+                                    activityLevel: _activityLevel,
+                                    onActivityLevelChanged: (val) =>
+                                        setState(() => _activityLevel = val),
+                                    primaryGoal: _primaryGoal,
+                                    onPrimaryGoalChanged: (val) =>
+                                        setState(() => _primaryGoal = val),
+                                  ),
+                          ),
                           if (authState.hasError) ...[
-                            const SizedBox(height: 16),
+                            const SizedBox(height: AppSpacing.lg),
                             Container(
-                              padding: const EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(AppSpacing.md),
                               decoration: BoxDecoration(
                                 color: AppColors.errorContainer,
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: AppRadius.mdBorder,
                                 border: Border.all(
                                   color: AppColors.error.withValues(alpha: 0.3),
                                 ),
@@ -221,7 +218,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                     color: AppColors.error,
                                     size: 20,
                                   ),
-                                  const SizedBox(width: 8),
+                                  const SizedBox(width: AppSpacing.sm),
                                   Expanded(
                                     child: Text(
                                       authState.error.toString().replaceAll(
@@ -239,69 +236,29 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               ),
                             ),
                           ],
-                          const SizedBox(height: 28),
+                          const SizedBox(height: AppSpacing.xxl),
                           Row(
                             children: [
                               if (_currentStep > 0) ...[
                                 Expanded(
-                                  child: OutlinedButton(
-                                    onPressed: isLoading ? null : _previousStep,
-                                    style: OutlinedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 16,
-                                      ),
-                                      side: const BorderSide(
-                                        color: AppColors.inputBorder,
-                                        width: 1.5,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                    ),
-                                    child: const Text(
-                                      'Back',
-                                      style: TextStyle(
-                                        color: AppColors.lightTextSecondary,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                                  child: AppButton(
+                                    label: 'Back',
+                                    isLoading: isLoading,
+                                    onPressed: _previousStep,
+                                    variant: AppButtonVariant.outline,
                                   ),
                                 ),
-                                const SizedBox(width: 12),
+                                const SizedBox(width: AppSpacing.md),
                               ],
                               Expanded(
                                 flex: 2,
-                                child: ElevatedButton(
-                                  onPressed: isLoading ? null : _nextStep,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primary,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    elevation: 2,
-                                  ),
-                                  child: isLoading
-                                      ? const SizedBox(
-                                          width: 22,
-                                          height: 22,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2.5,
-                                            color: Colors.white,
-                                          ),
-                                        )
-                                      : Text(
-                                          _currentStep == 2
-                                              ? 'Create Account'
-                                              : 'Continue',
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
+                                child: AppButton(
+                                  label: _currentStep == 2
+                                      ? 'Create Account'
+                                      : 'Continue',
+                                  isLoading: isLoading,
+                                  onPressed: _nextStep,
+                                  variant: AppButtonVariant.primary,
                                 ),
                               ),
                             ],
@@ -310,7 +267,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.xxl),
                   Wrap(
                     alignment: WrapAlignment.center,
                     crossAxisAlignment: WrapCrossAlignment.center,
@@ -374,7 +331,7 @@ class _StepProgressPill extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             '$stepNumber. $label',
             style: TextStyle(

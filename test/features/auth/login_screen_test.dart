@@ -61,10 +61,7 @@ void main() {
 
     expect(find.text('Welcome Back'), findsOneWidget);
     expect(find.byType(TextFormField), findsNWidgets(2));
-    expect(find.widgetWithText(ElevatedButton, 'Log In'), findsOneWidget);
-    expect(
-      find.widgetWithText(OutlinedButton, '⚡ Dev Quick Login'),
-      findsOneWidget,
-    );
+    expect(find.text('Log In'), findsOneWidget);
+    expect(find.text('⚡ Dev Quick Login'), findsOneWidget);
   });
 }

@@ -2,176 +2,137 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/bite_logo.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../dashboard/presentation/screens/dashboard_screen.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  int _currentIndex = 0;
+
+  final List<Widget> _screens = const [
+    DashboardScreen(),
+    _PlaceholderTab(
+      title: 'Camera Meal Vision',
+      icon: Icons.camera_alt_outlined,
+    ),
+    _PlaceholderTab(
+      title: 'AI Nutrition Assistant',
+      icon: Icons.chat_bubble_outline,
+    ),
+    _PlaceholderTab(title: 'User Profile & Goals', icon: Icons.person_outline),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final authState = ref.watch(authNotifierProvider);
+    final user = authState.valueOrNull;
 
     return Scaffold(
-      appBar: AppBar(title: const BiteLogo(size: 32)),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 12),
-              const BiteLogo(size: 80, showText: true),
-              const SizedBox(height: 20),
+      backgroundColor: AppColors.lightBackground,
+      appBar: AppBar(
+        backgroundColor: AppColors.lightSurface,
+        elevation: 0,
+        centerTitle: false,
+        title: Row(
+          children: [
+            const BiteLogo(size: 36, showText: true),
+            if (user != null) ...[
+              const Spacer(),
               Text(
-                'AI-Powered Nutrition & Health Partner',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w500,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryContainer,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(
-                              Icons.bolt_rounded,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Daily Macro Goals',
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      Row(
-                        children: const [
-                          Expanded(
-                            child: _MacroPill(
-                              label: 'Calories',
-                              value: '2,400 kcal',
-                              color: AppColors.calories,
-                              icon: Icons.local_fire_department_rounded,
-                            ),
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: _MacroPill(
-                              label: 'Protein',
-                              value: '180 g',
-                              color: AppColors.protein,
-                              icon: Icons.fitness_center_rounded,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: const [
-                          Expanded(
-                            child: _MacroPill(
-                              label: 'Carbs',
-                              value: '250 g',
-                              color: AppColors.carbs,
-                              icon: Icons.grain_rounded,
-                            ),
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: _MacroPill(
-                              label: 'Fat',
-                              value: '70 g',
-                              color: AppColors.fat,
-                              icon: Icons.water_drop_rounded,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.camera_alt_rounded),
-                label: const Text('Log Your First Meal'),
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(52),
+                'Hi, ${user.displayName ?? 'Foodie'} 👋',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.lightTextPrimary,
                 ),
               ),
             ],
-          ),
+          ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.logout_outlined,
+              color: AppColors.lightTextSecondary,
+              size: 22,
+            ),
+            tooltip: 'Log Out',
+            onPressed: () {
+              ref.read(authNotifierProvider.notifier).logout();
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: IndexedStack(index: _currentIndex, children: _screens),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        backgroundColor: AppColors.lightSurface,
+        indicatorColor: AppColors.primaryContainer,
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.dashboard_outlined),
+            selectedIcon: Icon(Icons.dashboard, color: AppColors.primaryDark),
+            label: 'Dashboard',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.camera_alt_outlined),
+            selectedIcon: Icon(Icons.camera_alt, color: AppColors.primaryDark),
+            label: 'Meals',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.chat_bubble_outline),
+            selectedIcon: Icon(Icons.chat_bubble, color: AppColors.primaryDark),
+            label: 'AI Assistant',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person, color: AppColors.primaryDark),
+            label: 'Profile',
+          ),
+        ],
       ),
     );
   }
 }
 
-class _MacroPill extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
+class _PlaceholderTab extends StatelessWidget {
+  final String title;
   final IconData icon;
 
-  const _MacroPill({
-    required this.label,
-    required this.value,
-    required this.color,
-    required this.icon,
-  });
+  const _PlaceholderTab({required this.title, required this.icon});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
+    return Center(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Row(
-            children: [
-              Icon(icon, size: 16, color: color),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: color,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
+          Icon(icon, size: 64, color: AppColors.primary),
+          const SizedBox(height: 16),
           Text(
-            value,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            title,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppColors.lightTextPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Coming in next milestone phase!',
+            style: TextStyle(color: AppColors.lightTextSecondary),
           ),
         ],
       ),

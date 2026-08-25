@@ -4,6 +4,35 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bite_front_end/app.dart';
 import 'package:bite_front_end/core/utils/storage_service.dart';
 import 'package:bite_front_end/core/constants/storage_constants.dart';
+import 'package:bite_front_end/features/dashboard/data/repositories/dashboard_repository.dart';
+import 'package:bite_front_end/features/dashboard/data/models/daily_dashboard_response_model.dart';
+import 'package:bite_front_end/features/dashboard/data/models/historical_analytics_response_model.dart';
+
+class FakeDashboardRepository implements DashboardRepository {
+  @override
+  Future<DailyDashboardResponseModel> getDailyDashboard(String dateStr) async {
+    return DailyDashboardResponseModel(
+      date: dateStr,
+      targetCalories: 2400.0,
+      consumedCalories: 1800.0,
+      remainingCalories: 600.0,
+      protein: const MacroProgressModel(target: 180, consumed: 75, remaining: 105),
+      carbs: const MacroProgressModel(target: 250, consumed: 200, remaining: 50),
+      fat: const MacroProgressModel(target: 70, consumed: 35, remaining: 35),
+      meals: const [],
+      topMicronutrients: const {},
+    );
+  }
+
+  @override
+  Future<HistoricalAnalyticsResponseModel> getHistoricalAnalytics(int days) async {
+    return const HistoricalAnalyticsResponseModel(
+      userId: 'user_123',
+      totalDaysLogged: 1,
+      history: [],
+    );
+  }
+}
 
 void main() {
   testWidgets('SplashScreen redirects unauthenticated user to LoginScreen', (
@@ -16,6 +45,7 @@ void main() {
       ProviderScope(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+          dashboardRepositoryProvider.overrideWithValue(FakeDashboardRepository()),
         ],
         child: const BiteApp(),
       ),
@@ -46,6 +76,7 @@ void main() {
       ProviderScope(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+          dashboardRepositoryProvider.overrideWithValue(FakeDashboardRepository()),
         ],
         child: const BiteApp(),
       ),
@@ -55,6 +86,6 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 3));
 
     // Navigates to HomeScreen when authenticated
-    expect(find.text('Daily Macro Goals'), findsOneWidget);
+    expect(find.text('Macro Trends'), findsOneWidget);
   });
 }
