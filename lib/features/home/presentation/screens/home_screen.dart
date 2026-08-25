@@ -1,12 +1,13 @@
+import 'package:bite_front_end/core/theme/app_colors.dart';
+import 'package:bite_front_end/core/widgets/bite_app_shell.dart';
+import 'package:bite_front_end/core/widgets/bite_logo.dart';
+import 'package:bite_front_end/features/auth/presentation/providers/auth_provider.dart';
+import 'package:bite_front_end/features/chat/presentation/screens/chat_screen.dart';
+import 'package:bite_front_end/features/dashboard/presentation/screens/dashboard_screen.dart';
+import 'package:bite_front_end/features/meals/presentation/screens/meal_ingestion_screen.dart';
+import 'package:bite_front_end/features/profile/presentation/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/bite_logo.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../chat/presentation/screens/chat_screen.dart';
-import '../../../dashboard/presentation/screens/dashboard_screen.dart';
-import '../../../meals/presentation/screens/meal_ingestion_screen.dart';
-import '../../../profile/presentation/screens/profile_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -29,11 +30,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
     final user = authState.valueOrNull;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: AppColors.lightBackground,
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : AppColors.lightBackground,
       appBar: AppBar(
-        backgroundColor: AppColors.lightSurface,
+        backgroundColor: isDark
+            ? AppColors.darkSurface
+            : AppColors.lightSurface,
         elevation: 0,
         centerTitle: false,
         title: Row(
@@ -43,10 +50,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const Spacer(),
               Text(
                 'Hi, ${user.displayName ?? 'Foodie'} 👋',
-                style: const TextStyle(
-                  fontSize: 14,
+                style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: AppColors.lightTextPrimary,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.lightTextPrimary,
                 ),
               ),
             ],
@@ -54,9 +62,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.logout_outlined,
-              color: AppColors.lightTextSecondary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.lightTextSecondary,
               size: 22,
             ),
             tooltip: 'Log Out',
@@ -67,38 +77,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           const SizedBox(width: 8),
         ],
       ),
-      body: IndexedStack(index: _currentIndex, children: _screens),
-      bottomNavigationBar: NavigationBar(
+      body: BiteAppShell(
         selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
+        onTabSelected: (index) {
           setState(() {
             _currentIndex = index;
           });
         },
-        backgroundColor: AppColors.lightSurface,
-        indicatorColor: AppColors.primaryContainer,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard, color: AppColors.primaryDark),
-            label: 'Dashboard',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.camera_alt_outlined),
-            selectedIcon: Icon(Icons.camera_alt, color: AppColors.primaryDark),
-            label: 'Meals',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.chat_bubble_outline),
-            selectedIcon: Icon(Icons.chat_bubble, color: AppColors.primaryDark),
-            label: 'AI Assistant',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person, color: AppColors.primaryDark),
-            label: 'Profile',
-          ),
-        ],
+        onQuickLogPressed: () {
+          setState(() {
+            _currentIndex = 1; // Switch to Meals tab
+          });
+        },
+        children: _screens,
       ),
     );
   }
