@@ -8,15 +8,14 @@ class BiteLogo extends StatelessWidget {
 
   const BiteLogo({
     super.key,
-    this.size = 40.0,
+    this.size = 44.0,
     this.showText = true,
     this.textColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    final effectiveTextColor =
-        textColor ?? Theme.of(context).colorScheme.onSurface;
+    final effectiveTextColor = textColor ?? AppColors.lightTextPrimary;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -25,13 +24,18 @@ class BiteLogo extends StatelessWidget {
         Container(
           width: size,
           height: size,
+          padding: EdgeInsets.all(size * 0.08),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.white,
+            gradient: const LinearGradient(
+              colors: [AppColors.primary, AppColors.primaryDark],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.15),
-                blurRadius: 10,
+                color: AppColors.primary.withValues(alpha: 0.25),
+                blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
             ],
@@ -41,17 +45,15 @@ class BiteLogo extends StatelessWidget {
               'assets/images/bite_logo.jpg',
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
-                // Fallback lowercase "b" icon painter if asset is loading or missing
-                return Container(
-                  color: AppColors.primaryContainer,
-                  alignment: Alignment.center,
+                return Center(
                   child: Text(
                     'b',
                     style: TextStyle(
-                      fontSize: size * 0.65,
+                      fontSize: size * 0.6,
                       fontWeight: FontWeight.w900,
-                      color: AppColors.primary,
+                      color: Colors.white,
                       fontFamily: 'sans-serif',
+                      height: 1.0,
                     ),
                   ),
                 );
@@ -77,7 +79,7 @@ class BiteLogo extends StatelessWidget {
                   text: 'ite',
                   style: TextStyle(
                     fontSize: size * 0.7,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                     color: effectiveTextColor,
                     letterSpacing: -0.5,
                   ),

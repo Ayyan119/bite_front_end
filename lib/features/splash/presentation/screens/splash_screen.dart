@@ -28,14 +28,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     );
 
     _scaleAnimation = Tween<double>(
-      begin: 0.7,
+      begin: 0.75,
       end: 1.0,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.2, 1.0, curve: Curves.easeIn),
+        curve: const Interval(0.15, 1.0, curve: Curves.easeIn),
       ),
     );
 
@@ -54,7 +54,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     if (token != null && token.isNotEmpty) {
       context.go('/home');
     } else {
-      context.go('/home'); // Go to home or login screen
+      context.go('/login');
     }
   }
 
@@ -66,25 +66,20 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return Scaffold(
-      backgroundColor: isDark
-          ? AppColors.darkBackground
-          : AppColors.lightBackground,
+      backgroundColor: AppColors.lightBackground,
       body: Stack(
         children: [
-          // Background ambient gradient glow
+          // Fresh Organic Background Ambient Gradient Glow
           Positioned.fill(
             child: Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: RadialGradient(
-                  center: const Alignment(0, -0.2),
-                  radius: 0.8,
+                  center: Alignment(0, -0.25),
+                  radius: 0.85,
                   colors: [
-                    AppColors.primary.withValues(alpha: isDark ? 0.15 : 0.08),
-                    Colors.transparent,
+                    AppColors.primaryContainer,
+                    AppColors.lightBackground,
                   ],
                 ),
               ),
@@ -105,48 +100,58 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Prominent Animated lowercase "b" bite logo
                   const BiteLogo(size: 96, showText: true),
-                  const SizedBox(height: 16),
-                  Text(
-                    'AI-Powered Nutrition & Health',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.lightTextSecondary,
-                      letterSpacing: 0.5,
-                      fontWeight: FontWeight.w500,
+                  const SizedBox(height: 18),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryContainer,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: const Text(
+                      'AI-Powered Nutrition & Health',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryDark,
+                        letterSpacing: 0.4,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          // Bottom loading pulse indicator & version tag
           Positioned(
-            bottom: 48,
+            bottom: 54,
             left: 0,
             right: 0,
             child: Column(
               children: [
                 SizedBox(
-                  width: 32,
-                  height: 32,
+                  width: 36,
+                  height: 36,
                   child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
+                    strokeWidth: 3,
                     color: AppColors.primary,
-                    backgroundColor: AppColors.primary.withValues(alpha: 0.15),
+                    backgroundColor: AppColors.primaryLight.withValues(
+                      alpha: 0.4,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text(
+                const Text(
                   'v1.0.0',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color:
-                        (isDark
-                                ? AppColors.darkTextSecondary
-                                : AppColors.lightTextSecondary)
-                            .withValues(alpha: 0.6),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.lightTextMuted,
                   ),
                 ),
               ],
