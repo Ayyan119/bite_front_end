@@ -6,6 +6,7 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../chat/presentation/screens/chat_screen.dart';
 import '../../../dashboard/presentation/screens/dashboard_screen.dart';
 import '../../../meals/presentation/screens/meal_ingestion_screen.dart';
+import '../../../profile/presentation/screens/profile_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -21,7 +22,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     DashboardScreen(),
     MealIngestionScreen(),
     ChatScreen(),
-    _PlaceholderTab(title: 'User Profile & Goals', icon: Icons.person_outline),
+    ProfileScreen(),
   ];
 
   @override
@@ -96,39 +97,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             icon: Icon(Icons.person_outline),
             selectedIcon: Icon(Icons.person, color: AppColors.primaryDark),
             label: 'Profile',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PlaceholderTab extends StatelessWidget {
-  final String title;
-  final IconData icon;
-
-  const _PlaceholderTab({required this.title, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 64, color: AppColors.primary),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.lightTextPrimary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Coming in next milestone phase!',
-            style: TextStyle(color: AppColors.lightTextSecondary),
           ),
         ],
       ),

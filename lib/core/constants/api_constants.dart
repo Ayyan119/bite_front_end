@@ -18,6 +18,9 @@ class ApiConstants {
   static String chatSessionDelete(String sessionId) =>
       '/chat/sessions/$sessionId';
 
+  // Profile endpoints
+  static const String profile = '/profile';
+
   // Timeout settings
   static const Duration connectTimeout = Duration(seconds: 15);
   static const Duration receiveTimeout = Duration(seconds: 30);
