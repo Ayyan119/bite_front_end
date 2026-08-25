@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/bite_logo.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../dashboard/presentation/screens/dashboard_screen.dart';
+import '../../../meals/presentation/screens/meal_ingestion_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -17,10 +18,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   final List<Widget> _screens = const [
     DashboardScreen(),
-    _PlaceholderTab(
-      title: 'Camera Meal Vision',
-      icon: Icons.camera_alt_outlined,
-    ),
+    MealIngestionScreen(),
     _PlaceholderTab(
       title: 'AI Nutrition Assistant',
       icon: Icons.chat_bubble_outline,

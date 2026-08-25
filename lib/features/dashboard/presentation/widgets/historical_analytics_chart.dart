@@ -24,11 +24,7 @@ class HistoricalAnalyticsChart extends ConsumerWidget {
             children: [
               const Row(
                 children: [
-                  Icon(
-                    Icons.insights,
-                    color: AppColors.primary,
-                    size: 22,
-                  ),
+                  Icon(Icons.insights, color: AppColors.primary, size: 22),
                   SizedBox(width: AppSpacing.sm),
                   Text(
                     'Macro Trends',
@@ -46,14 +42,16 @@ class HistoricalAnalyticsChart extends ConsumerWidget {
                     days: 7,
                     selectedDays: selectedDays,
                     onTap: () =>
-                        ref.read(historicalRangeDaysProvider.notifier).state = 7,
+                        ref.read(historicalRangeDaysProvider.notifier).state =
+                            7,
                   ),
                   const SizedBox(width: 4),
                   _RangeChip(
                     days: 30,
                     selectedDays: selectedDays,
                     onTap: () =>
-                        ref.read(historicalRangeDaysProvider.notifier).state = 30,
+                        ref.read(historicalRangeDaysProvider.notifier).state =
+                            30,
                   ),
                 ],
               ),
@@ -97,7 +95,9 @@ class HistoricalAnalyticsChart extends ConsumerWidget {
                             message:
                                 '${item.date}: ${item.totalCalories.toInt()} kcal',
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 3),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 3,
+                              ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
@@ -217,10 +217,7 @@ class _StatusLegend extends StatelessWidget {
         Container(
           width: 10,
           height: 10,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 4),
         Text(

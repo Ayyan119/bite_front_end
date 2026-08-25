@@ -16,8 +16,16 @@ class FakeDashboardRepository implements DashboardRepository {
       targetCalories: 2400.0,
       consumedCalories: 1800.0,
       remainingCalories: 600.0,
-      protein: const MacroProgressModel(target: 180, consumed: 75, remaining: 105),
-      carbs: const MacroProgressModel(target: 250, consumed: 200, remaining: 50),
+      protein: const MacroProgressModel(
+        target: 180,
+        consumed: 75,
+        remaining: 105,
+      ),
+      carbs: const MacroProgressModel(
+        target: 250,
+        consumed: 200,
+        remaining: 50,
+      ),
       fat: const MacroProgressModel(target: 70, consumed: 35, remaining: 35),
       meals: const [],
       topMicronutrients: const {},
@@ -25,7 +33,9 @@ class FakeDashboardRepository implements DashboardRepository {
   }
 
   @override
-  Future<HistoricalAnalyticsResponseModel> getHistoricalAnalytics(int days) async {
+  Future<HistoricalAnalyticsResponseModel> getHistoricalAnalytics(
+    int days,
+  ) async {
     return const HistoricalAnalyticsResponseModel(
       userId: 'user_123',
       totalDaysLogged: 1,
@@ -45,7 +55,9 @@ void main() {
       ProviderScope(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(sharedPreferences),
-          dashboardRepositoryProvider.overrideWithValue(FakeDashboardRepository()),
+          dashboardRepositoryProvider.overrideWithValue(
+            FakeDashboardRepository(),
+          ),
         ],
         child: const BiteApp(),
       ),
@@ -76,7 +88,9 @@ void main() {
       ProviderScope(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(sharedPreferences),
-          dashboardRepositoryProvider.overrideWithValue(FakeDashboardRepository()),
+          dashboardRepositoryProvider.overrideWithValue(
+            FakeDashboardRepository(),
+          ),
         ],
         child: const BiteApp(),
       ),

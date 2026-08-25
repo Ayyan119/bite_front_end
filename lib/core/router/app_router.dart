@@ -5,6 +5,8 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/meals/presentation/screens/meal_ingestion_screen.dart';
+import '../../features/meals/presentation/screens/meal_review_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authNotifierProvider);
@@ -51,6 +53,21 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/home',
         name: 'home',
         builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: '/dashboard',
+        name: 'dashboard',
+        builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: '/meals/log',
+        name: 'meals-log',
+        builder: (context, state) => const MealIngestionScreen(),
+      ),
+      GoRoute(
+        path: '/meals/review',
+        name: 'meals-review',
+        builder: (context, state) => const MealReviewScreen(),
       ),
     ],
   );
