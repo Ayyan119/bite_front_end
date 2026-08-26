@@ -51,22 +51,27 @@ class DashboardScreen extends ConsumerWidget {
 
     final dashboardAsync = ref.watch(dailyDashboardProvider(dateStr));
 
+    final topPadding =
+        (kToolbarHeight + 14.0 + MediaQuery.of(context).padding.top + 8.0) *
+            0.65;
+
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
-      body: SafeArea(
-        child: RefreshIndicator(
-          color: AppColors.secondary,
-          backgroundColor: Colors.white,
-          onRefresh: () async {
-            ref.invalidate(dailyDashboardProvider(dateStr));
-            ref.invalidate(historicalAnalyticsProvider);
-          },
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.md,
-            ),
+      body: RefreshIndicator(
+        color: AppColors.secondary,
+        backgroundColor: Colors.white,
+        onRefresh: () async {
+          ref.invalidate(dailyDashboardProvider(dateStr));
+          ref.invalidate(historicalAnalyticsProvider);
+        },
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.only(
+            top: topPadding,
+            bottom: 95,
+            left: AppSpacing.lg,
+            right: AppSpacing.lg,
+          ),
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 600),
@@ -194,7 +199,6 @@ class DashboardScreen extends ConsumerWidget {
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
   }
-}

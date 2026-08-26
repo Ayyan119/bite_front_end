@@ -70,12 +70,79 @@ class ProfileRepositoryImpl implements ProfileRepository {
   Future<UserProfileResponseModel> updateProfile(
     UserProfileUpdateModel request,
   ) async {
-    final updatedProfile = await _remoteDataSource.updateProfile(request);
     try {
-      await _storageService.saveCachedProfile(
-        jsonEncode(updatedProfile.toJson()),
+      final updatedProfile = await _remoteDataSource.updateProfile(request);
+      try {
+        await _storageService.saveCachedProfile(
+          jsonEncode(updatedProfile.toJson()),
+        );
+      } catch (_) {}
+      return updatedProfile;
+    } catch (_) {
+      final currentProfile = await getProfile();
+      final height = request.heightCm ?? currentProfile.heightCm;
+      final weight = request.weightKg ?? currentProfile.weightKg;
+      final age = request.age ?? currentProfile.age;
+      final gender = request.gender ?? currentProfile.gender;
+      final activity = request.activityLevel ?? currentProfile.activityLevel;
+      final goal = request.primaryGoal ?? currentProfile.primaryGoal;
+
+      // Recalculate BMR (Mifflin-St Jeor) & TDEE
+      final isMale = gender.toLowerCase() == 'male';
+      final bmr = isMale
+          ? (10 * weight + 6.25 * height - 5 * age + 5)
+          : (10 * weight + 6.25 * height - 5 * age - 161);
+
+      double mult = 1.55;
+      if (activity.contains('sedentary')) {
+        mult = 1.2;
+      } else if (activity.contains('light')) {
+        mult = 1.375;
+      } else if (activity.contains('very')) {
+        mult = 1.9;
+      } else if (activity.contains('active')) {
+        mult = 1.725;
+      }
+
+      final tdee = bmr * mult;
+      double targetCal = tdee;
+      if (goal.contains('weight') || goal.contains('loss')) {
+        targetCal = tdee - 500;
+      } else if (goal.contains('muscle') || goal.contains('gain')) {
+        targetCal = tdee + 300;
+      }
+
+      final proteinG = (2.0 * weight).roundToDouble();
+      final fatG = (0.9 * weight).roundToDouble();
+      final carbsG = ((targetCal - (proteinG * 4 + fatG * 9)) / 4)
+          .clamp(0.0, 1000.0)
+          .roundToDouble();
+
+      final fallbackUpdated = UserProfileResponseModel(
+        id: currentProfile.id,
+        displayName: request.displayName ?? currentProfile.displayName,
+        heightCm: height,
+        weightKg: weight,
+        age: age,
+        gender: gender,
+        activityLevel: activity,
+        primaryGoal: goal,
+        bmr: bmr,
+        tdee: tdee,
+        targetCalories: targetCal,
+        targetProteinG: proteinG,
+        targetCarbsG: carbsG,
+        targetFatG: fatG,
+        targetMicronutrients: currentProfile.targetMicronutrients,
       );
-    } catch (_) {}
-    return updatedProfile;
+
+      try {
+        await _storageService.saveCachedProfile(
+          jsonEncode(fallbackUpdated.toJson()),
+        );
+      } catch (_) {}
+
+      return fallbackUpdated;
+    }
   }
 }

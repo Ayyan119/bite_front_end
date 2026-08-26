@@ -43,32 +43,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(profileNotifierProvider);
 
+    final topPadding =
+        (kToolbarHeight + 14.0 + MediaQuery.of(context).padding.top + 8.0) *
+            0.65;
+
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        centerTitle: false,
-        title: const Text(
-          'Profile & Goals',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w900,
-            color: Color(0xFF0F172A),
-            letterSpacing: -0.2,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: Color(0xFF64748B)),
-            tooltip: 'Refresh Profile',
-            onPressed: () {
-              ref.read(profileNotifierProvider.notifier).fetchProfile();
-            },
-          ),
-        ],
-      ),
       body: profileAsync.when(
         data: (profile) {
           return RefreshIndicator(
@@ -79,12 +59,61 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             backgroundColor: Colors.white,
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.only(
+                top: topPadding,
+                bottom: 95,
+                left: 16,
+                right: 16,
+              ),
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 600),
                   child: Column(
                     children: [
+                      // Section Header Row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Profile & Goals',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900,
+                                  color: Color(0xFF0F172A),
+                                  letterSpacing: -0.3,
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                'Personal Metabolic & Physical Metrics',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF64748B),
+                                ),
+                              ),
+                            ],
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.refresh_rounded,
+                              color: AppColors.secondary,
+                            ),
+                            tooltip: 'Refresh Profile',
+                            onPressed: () {
+                              ref
+                                  .read(profileNotifierProvider.notifier)
+                                  .fetchProfile();
+                            },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
                       // Header Card
                       BiteFadeSlide(
                         delay: Duration.zero,

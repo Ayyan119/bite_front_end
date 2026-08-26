@@ -109,6 +109,8 @@ class _ChatInputBarState extends State<ChatInputBar> {
                           fontWeight: FontWeight.w600,
                         ),
                         decoration: InputDecoration(
+                          filled: false,
+                          fillColor: Colors.transparent,
                           hintText: widget.isStreaming
                               ? 'AI assistant is typing...'
                               : 'Ask nutrition advice or log a meal...',

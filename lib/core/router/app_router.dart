@@ -5,11 +5,7 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/splash/presentation/screens/splash_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
-import '../../features/meals/presentation/screens/meal_ingestion_screen.dart';
 import '../../features/meals/presentation/screens/meal_review_screen.dart';
-
-import '../../features/chat/presentation/screens/chat_screen.dart';
-import '../../features/profile/presentation/screens/profile_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authNotifierProvider);
@@ -26,11 +22,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         return null;
       }
 
+      // Allow splash screen ('/') to render its full animated logo and title sequence
+      if (matched == '/') {
+        return null;
+      }
+
       if (!isAuthenticated && !isAuthRoute) {
         return '/login';
       }
 
-      if (isAuthenticated && (isAuthRoute || matched == '/')) {
+      if (isAuthenticated && isAuthRoute) {
         return '/home';
       }
 
@@ -65,17 +66,17 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/chat',
         name: 'chat',
-        builder: (context, state) => const ChatScreen(),
+        builder: (context, state) => const HomeScreen(),
       ),
       GoRoute(
         path: '/profile',
         name: 'profile',
-        builder: (context, state) => const ProfileScreen(),
+        builder: (context, state) => const HomeScreen(),
       ),
       GoRoute(
         path: '/meals/log',
         name: 'meals-log',
-        builder: (context, state) => const MealIngestionScreen(),
+        builder: (context, state) => const HomeScreen(),
       ),
       GoRoute(
         path: '/meals/review',

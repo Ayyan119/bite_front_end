@@ -45,9 +45,9 @@ void main() {
     expect(find.text('1720 kcal'), findsOneWidget);
     expect(find.text('2666 kcal'), findsOneWidget);
     expect(find.text('2400 kcal / day'), findsOneWidget);
-    expect(find.text('180 g'), findsOneWidget);
-    expect(find.text('250 g'), findsOneWidget);
-    expect(find.text('70 g'), findsOneWidget);
+    expect(find.textContaining('180 g'), findsOneWidget);
+    expect(find.textContaining('250 g'), findsOneWidget);
+    expect(find.textContaining('70 g'), findsOneWidget);
     expect(find.text('Edit Physical Metrics & Goals'), findsOneWidget);
   });
 

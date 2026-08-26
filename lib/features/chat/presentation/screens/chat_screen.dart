@@ -1,6 +1,9 @@
 import 'package:bite_front_end/core/theme/app_colors.dart';
+import 'package:bite_front_end/core/widgets/bite_blur_app_bar.dart';
 import 'package:bite_front_end/core/widgets/bite_fade_slide.dart';
+import 'package:bite_front_end/features/auth/presentation/providers/auth_provider.dart';
 import 'package:bite_front_end/features/chat/data/models/chat_message_response_model.dart';
+import 'package:bite_front_end/features/home/presentation/providers/home_tab_provider.dart';
 import 'package:bite_front_end/features/chat/presentation/providers/active_chat_provider.dart';
 import 'package:bite_front_end/features/chat/presentation/widgets/chat_bubble.dart';
 import 'package:bite_front_end/features/chat/presentation/widgets/chat_input_bar.dart';
@@ -110,27 +113,46 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ? 1
         : (hasStatusMessage ? 1 : 0);
 
+    final authState = ref.watch(authNotifierProvider);
+    final displayName = authState.valueOrNull?.displayName ?? '';
+    final userInitial = displayName.isNotEmpty
+        ? displayName[0].toUpperCase()
+        : '👤';
+
+    final topPadding =
+        (kToolbarHeight + 14.0 + MediaQuery.of(context).padding.top + 8.0) *
+            0.65;
+
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
+      extendBodyBehindAppBar: true,
       drawer: showDrawerButton ? const ChatSessionsDrawer() : null,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
+        toolbarHeight: kToolbarHeight + 14.0,
+        flexibleSpace: const BiteBlurAppBarBackground(),
+        titleSpacing: 4,
         title: const Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               Icons.auto_awesome_rounded,
               color: AppColors.secondary,
               size: 20,
             ),
-            SizedBox(width: 8),
-            Text(
-              'AI Nutrition Assistant',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w900,
-                color: Color(0xFF0F172A),
+            SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                'AI Nutrition Assistant',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF0F172A),
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
             ),
           ],
@@ -175,6 +197,52 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 ),
               )
             : null,
+        actions: [
+          IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            icon: const Icon(Icons.add_rounded, color: AppColors.secondary),
+            tooltip: 'New Chat',
+            onPressed: () {
+              ref.read(activeChatNotifierProvider.notifier).startNewSession();
+            },
+          ),
+          GestureDetector(
+            onTap: () {
+              ref.read(homeTabIndexProvider.notifier).state = 3;
+            },
+            child: Container(
+              margin: const EdgeInsets.only(right: 12, left: 4),
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF7ED),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.secondary.withValues(alpha: 0.35),
+                  width: 1.2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.secondary.withValues(alpha: 0.12),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Text(
+                  userInitial,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.secondary,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       body: Stack(
         children: [
@@ -228,7 +296,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             keyboardDismissBehavior:
                                 ScrollViewKeyboardDismissBehavior.onDrag,
                             padding: EdgeInsets.only(
-                              top: 12.0,
+                              top: topPadding,
                               bottom: isMobile
                                   ? (isKeyboardOpen ? 120.0 : 210.0)
                                   : 140.0,
@@ -338,6 +406,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   Widget _buildEmptyState(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 600;
+    final topPadding =
+        (kToolbarHeight + 14.0 + MediaQuery.of(context).padding.top + 16.0) *
+            0.65;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -356,7 +427,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             padding: EdgeInsets.only(
               left: 20.0,
               right: 20.0,
-              top: 20.0,
+              top: topPadding,
               bottom: isMobile ? 180.0 : 120.0,
             ),
             child: Container(

@@ -48,7 +48,7 @@ class _EditProfileBottomSheetState
   String _normalizePrimaryGoal(String raw) {
     final val = raw.toLowerCase().trim();
     if (val.contains('weight') || val.contains('fat') || val.contains('loss')) {
-      return 'fat_loss';
+      return 'weight_loss';
     }
     if (val.contains('muscle') || val.contains('gain')) return 'muscle_gain';
     return 'maintenance';
@@ -388,8 +388,8 @@ class _EditProfileBottomSheetState
               Wrap(
                 spacing: 8,
                 children: [
+                  _buildGoalChip('weight_loss', '🔥 Weight Loss'),
                   _buildGoalChip('muscle_gain', '💪 Muscle Gain'),
-                  _buildGoalChip('fat_loss', '🔥 Fat Loss'),
                   _buildGoalChip('maintenance', '⚖️ Maintenance'),
                 ],
               ),

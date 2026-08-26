@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/bite_blur_app_bar.dart';
 import '../../../../core/widgets/bite_fade_slide.dart';
 import '../../../dashboard/presentation/providers/dashboard_provider.dart';
 import '../../../home/presentation/providers/home_tab_provider.dart';
@@ -101,12 +102,19 @@ class _MealReviewScreenState extends ConsumerState<MealReviewScreen>
     final isCommitting = state.status == MealAnalysisStatus.committing;
     final canConfirm = hasItems && !isCommitting;
 
+    final topPadding =
+        (kToolbarHeight + 14.0 + MediaQuery.of(context).padding.top + AppSpacing.sm) *
+            0.65;
+
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
+        toolbarHeight: kToolbarHeight + 14.0,
+        flexibleSpace: const BiteBlurAppBarBackground(),
         centerTitle: false,
         title: const Text(
           'REVIEW & CONFIRM MEAL',
@@ -118,12 +126,16 @@ class _MealReviewScreenState extends ConsumerState<MealReviewScreen>
           ),
         ),
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppSpacing.md),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.only(
+                top: topPadding,
+                bottom: AppSpacing.md,
+                left: AppSpacing.md,
+                right: AppSpacing.md,
+              ),
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 600),
@@ -259,6 +271,7 @@ class _MealReviewScreenState extends ConsumerState<MealReviewScreen>
                                 )
                               else
                                 ListView.builder(
+                                  padding: EdgeInsets.zero,
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
                                   itemCount: state.items.length,
@@ -393,7 +406,6 @@ class _MealReviewScreenState extends ConsumerState<MealReviewScreen>
             ),
           ],
         ),
-      ),
-    );
+      );
+    }
   }
-}

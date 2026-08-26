@@ -81,13 +81,21 @@ class _MealIngestionScreenState extends ConsumerState<MealIngestionScreen> {
     final isAnalyzing = state.status == MealAnalysisStatus.analyzing;
     final canAnalyze = hasImage && !isAnalyzing;
 
+    final topPadding =
+        (kToolbarHeight + 14.0 + MediaQuery.of(context).padding.top + AppSpacing.md) *
+            0.65;
+
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: EdgeInsets.only(
+              top: topPadding,
+              bottom: 95,
+              left: AppSpacing.lg,
+              right: AppSpacing.lg,
+            ),
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 600),
@@ -352,9 +360,8 @@ class _MealIngestionScreenState extends ConsumerState<MealIngestionScreen> {
             if (isAnalyzing) const VisionScanningOverlay(),
           ],
         ),
-      ),
-    );
-  }
+      );
+    }
 
   Widget _buildPromptChip(String label) {
     return GestureDetector(

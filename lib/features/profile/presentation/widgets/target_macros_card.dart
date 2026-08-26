@@ -1,20 +1,34 @@
 import 'package:bite_front_end/core/theme/app_colors.dart';
 import 'package:bite_front_end/core/theme/app_radius.dart';
+import 'package:bite_front_end/features/dashboard/presentation/providers/dashboard_provider.dart';
 import 'package:bite_front_end/features/profile/data/models/user_profile_response_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class TargetMacrosCard extends StatelessWidget {
+class TargetMacrosCard extends ConsumerWidget {
   final UserProfileResponseModel profile;
 
   const TargetMacrosCard({super.key, required this.profile});
 
   @override
-  Widget build(BuildContext context) {
-    final proteinVal = profile.targetProteinG > 0
+  Widget build(BuildContext context, WidgetRef ref) {
+    final todayStr = formatDateString(DateTime.now());
+    final dashboardAsync = ref.watch(dailyDashboardProvider(todayStr));
+    final dashboard = dashboardAsync.valueOrNull;
+
+    final consumedProtein = dashboard?.protein.consumed ?? 0.0;
+    final consumedCarbs = dashboard?.carbs.consumed ?? 0.0;
+    final consumedFat = dashboard?.fat.consumed ?? 0.0;
+
+    final proteinTarget = profile.targetProteinG > 0
         ? profile.targetProteinG
-        : 50.0;
-    final carbsVal = profile.targetCarbsG > 0 ? profile.targetCarbsG : 275.0;
-    final fatVal = profile.targetFatG > 0 ? profile.targetFatG : 67.0;
+        : 150.0;
+    final carbsTarget = profile.targetCarbsG > 0 ? profile.targetCarbsG : 250.0;
+    final fatTarget = profile.targetFatG > 0 ? profile.targetFatG : 70.0;
+
+    final proteinPct = (consumedProtein / proteinTarget).clamp(0.0, 1.0);
+    final carbsPct = (consumedCarbs / carbsTarget).clamp(0.0, 1.0);
+    final fatPct = (consumedFat / fatTarget).clamp(0.0, 1.0);
 
     return Container(
       width: double.infinity,
@@ -73,28 +87,28 @@ class TargetMacrosCard extends StatelessWidget {
           _buildMacroRow(
             emoji: '🍗',
             label: 'Protein Target',
-            value: '${proteinVal.round()} g',
+            value: '${consumedProtein.round()} / ${proteinTarget.round()} g',
             color: AppColors.protein,
             bgTint: const Color(0xFFFFF7ED),
-            percentage: 0.0, // 0% consumed until user logs food
+            percentage: proteinPct,
           ),
           const SizedBox(height: 12),
           _buildMacroRow(
             emoji: '🍞',
             label: 'Carbs Target',
-            value: '${carbsVal.round()} g',
+            value: '${consumedCarbs.round()} / ${carbsTarget.round()} g',
             color: AppColors.carbs,
             bgTint: const Color(0xFFFEF3C7),
-            percentage: 0.0, // 0% consumed until user logs food
+            percentage: carbsPct,
           ),
           const SizedBox(height: 12),
           _buildMacroRow(
             emoji: '🥑',
             label: 'Fat Target',
-            value: '${fatVal.round()} g',
+            value: '${consumedFat.round()} / ${fatTarget.round()} g',
             color: AppColors.fat,
             bgTint: const Color(0xFFECFDF5),
-            percentage: 0.0, // 0% consumed until user logs food
+            percentage: fatPct,
           ),
         ],
       ),
