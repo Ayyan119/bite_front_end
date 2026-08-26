@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 
 class MealTypeSelector extends StatelessWidget {
@@ -13,10 +12,34 @@ class MealTypeSelector extends StatelessWidget {
   });
 
   static const List<Map<String, dynamic>> _mealTypes = [
-    {'id': 'breakfast', 'label': 'Breakfast', 'icon': Icons.wb_sunny_outlined},
-    {'id': 'lunch', 'label': 'Lunch', 'icon': Icons.wb_twilight_outlined},
-    {'id': 'dinner', 'label': 'Dinner', 'icon': Icons.nightlife_outlined},
-    {'id': 'snack', 'label': 'Snack', 'icon': Icons.cookie_outlined},
+    {
+      'id': 'breakfast',
+      'label': 'Breakfast',
+      'icon': Icons.wb_sunny_rounded,
+      'badgeBg': Color(0xFFFFF7ED),
+      'iconColor': Color(0xFFF59E0B),
+    },
+    {
+      'id': 'lunch',
+      'label': 'Lunch',
+      'icon': Icons.restaurant_rounded,
+      'badgeBg': Color(0xFFECFDF5),
+      'iconColor': Color(0xFF10B981),
+    },
+    {
+      'id': 'dinner',
+      'label': 'Dinner',
+      'icon': Icons.dinner_dining_rounded,
+      'badgeBg': Color(0xFFFEF2F2),
+      'iconColor': Color(0xFFEF4444),
+    },
+    {
+      'id': 'snack',
+      'label': 'Snack',
+      'icon': Icons.cookie_rounded,
+      'badgeBg': Color(0xFFF3E8FF),
+      'iconColor': Color(0xFFA855F7),
+    },
   ];
 
   @override
@@ -25,48 +48,60 @@ class MealTypeSelector extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Meal Category',
+          'MEAL CATEGORY',
           style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColors.lightTextPrimary,
+            fontSize: 12,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.2,
+            color: Color(0xFF0F172A),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
             children: _mealTypes.map((type) {
               final isSelected = selectedMealType.toLowerCase() == type['id'];
+              final badgeBg = type['badgeBg'] as Color;
+              final iconColor = type['iconColor'] as Color;
+
               return Padding(
-                padding: const EdgeInsets.only(right: 8.0),
+                padding: const EdgeInsets.only(right: 10.0),
                 child: AnimatedScale(
                   scale: isSelected ? 1.04 : 1.0,
                   duration: const Duration(milliseconds: 200),
                   curve: Curves.easeInOutCubic,
                   child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
+                    duration: const Duration(milliseconds: 200),
                     curve: Curves.easeInOutCubic,
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? AppColors.primary
-                          : Theme.of(context).cardColor,
+                          ? const Color(0xFF0F172A)
+                          : Colors.white,
                       borderRadius: AppRadius.pillBorder,
                       border: Border.all(
                         color: isSelected
-                            ? AppColors.primary
-                            : AppColors.borderLight,
-                        width: 1.5,
+                            ? const Color(0xFF0F172A)
+                            : const Color(0xFFE2E8F0),
+                        width: 1.2,
                       ),
                       boxShadow: isSelected
                           ? [
                               BoxShadow(
-                                color: AppColors.primary.withValues(alpha: 0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 3),
+                                color: const Color(
+                                  0xFF0F172A,
+                                ).withValues(alpha: 0.28),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
                               ),
                             ]
-                          : [],
+                          : [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.03),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                     ),
                     child: Material(
                       color: Colors.transparent,
@@ -75,30 +110,37 @@ class MealTypeSelector extends StatelessWidget {
                         onTap: () => onSelected(type['id'] as String),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 10,
+                            horizontal: 14,
+                            vertical: 9,
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
-                                type['icon'] as IconData,
-                                size: 18,
-                                color: isSelected
-                                    ? Colors.white
-                                    : AppColors.lightTextMuted,
+                              Container(
+                                padding: const EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? Colors.white.withValues(alpha: 0.15)
+                                      : badgeBg,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  type['icon'] as IconData,
+                                  size: 14,
+                                  color: isSelected ? Colors.white : iconColor,
+                                ),
                               ),
-                              const SizedBox(width: 6),
+                              const SizedBox(width: 8),
                               Text(
                                 type['label'] as String,
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: isSelected
-                                      ? FontWeight.w700
-                                      : FontWeight.w500,
+                                      ? FontWeight.w900
+                                      : FontWeight.w700,
                                   color: isSelected
                                       ? Colors.white
-                                      : AppColors.lightTextPrimary,
+                                      : const Color(0xFF1E293B),
                                 ),
                               ),
                             ],

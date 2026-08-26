@@ -10,19 +10,29 @@ class UserInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final ageText = profile.age > 0 ? '${profile.age} yrs' : '--';
+    final heightText = profile.heightCm > 0
+        ? '${profile.heightCm.round()} cm'
+        : '--';
+    final weightText = profile.weightKg > 0
+        ? '${profile.weightKg.toStringAsFixed(1)} kg'
+        : '--';
+    final genderText = profile.gender.isNotEmpty
+        ? profile.gender[0].toUpperCase() + profile.gender.substring(1)
+        : '--';
+    final activityText = _formatActivityLabel(profile.activityLevel);
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(20.0),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkCard : AppColors.lightSurface,
-        borderRadius: AppRadius.lgBorder,
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 16,
             offset: const Offset(0, 4),
           ),
         ],
@@ -30,56 +40,80 @@ class UserInfoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Physical Attributes & Activity',
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: isDark
-                  ? AppColors.darkTextPrimary
-                  : AppColors.lightTextPrimary,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Expanded(
+                child: Text(
+                  'PHYSICAL ATTRIBUTES & ACTIVITY',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.2,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: AppRadius.pillBorder,
+                ),
+                child: const Text(
+                  '👤 Body Metrics',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF475569),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           _buildInfoRow(
-            context: context,
             label: 'Age',
-            value: '${profile.age} yrs',
-            icon: Icons.cake_outlined,
-            isDark: isDark,
+            value: ageText,
+            icon: Icons.cake_rounded,
+            iconBg: const Color(0xFFFFF7ED),
+            accentColor: AppColors.secondary,
           ),
-          const Divider(height: 16),
+          const Divider(height: 20, color: Color(0xFFF1F5F9)),
           _buildInfoRow(
-            context: context,
             label: 'Height',
-            value: '${profile.heightCm.round()} cm',
+            value: heightText,
             icon: Icons.height_rounded,
-            isDark: isDark,
+            iconBg: const Color(0xFFEFF6FF),
+            accentColor: const Color(0xFF2563EB),
           ),
-          const Divider(height: 16),
+          const Divider(height: 20, color: Color(0xFFF1F5F9)),
           _buildInfoRow(
-            context: context,
             label: 'Weight',
-            value: '${profile.weightKg.toStringAsFixed(1)} kg',
-            icon: Icons.monitor_weight_outlined,
-            isDark: isDark,
+            value: weightText,
+            icon: Icons.monitor_weight_rounded,
+            iconBg: const Color(0xFFECFDF5),
+            accentColor: const Color(0xFF10B981),
           ),
-          const Divider(height: 16),
+          const Divider(height: 20, color: Color(0xFFF1F5F9)),
           _buildInfoRow(
-            context: context,
             label: 'Gender',
-            value: profile.gender.isNotEmpty
-                ? profile.gender[0].toUpperCase() + profile.gender.substring(1)
-                : 'Male',
-            icon: Icons.person_outline,
-            isDark: isDark,
+            value: genderText,
+            icon: Icons.person_rounded,
+            iconBg: const Color(0xFFF3E8FF),
+            accentColor: const Color(0xFF9333EA),
           ),
-          const Divider(height: 16),
+          const Divider(height: 20, color: Color(0xFFF1F5F9)),
           _buildInfoRow(
-            context: context,
             label: 'Activity Level',
-            value: _formatActivityLabel(profile.activityLevel),
+            value: activityText,
             icon: Icons.directions_run_rounded,
-            isDark: isDark,
+            iconBg: const Color(0xFFFEF3C7),
+            accentColor: const Color(0xFFD97706),
           ),
         ],
       ),
@@ -87,40 +121,41 @@ class UserInfoCard extends StatelessWidget {
   }
 
   Widget _buildInfoRow({
-    required BuildContext context,
     required String label,
     required String value,
     required IconData icon,
-    required bool isDark,
+    required Color iconBg,
+    required Color accentColor,
   }) {
-    final theme = Theme.of(context);
-
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 20,
-          color: isDark
-              ? AppColors.darkTextSecondary
-              : AppColors.lightTextMuted,
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: iconBg,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, size: 18, color: accentColor),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 14),
         Text(
           label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: isDark
-                ? AppColors.darkTextSecondary
-                : AppColors.lightTextSecondary,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF64748B),
           ),
         ),
-        const Spacer(),
-        Text(
-          value,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: isDark
-                ? AppColors.darkTextPrimary
-                : AppColors.lightTextPrimary,
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF0F172A),
+            ),
           ),
         ),
       ],
@@ -128,6 +163,7 @@ class UserInfoCard extends StatelessWidget {
   }
 
   String _formatActivityLabel(String levelKey) {
+    if (levelKey.isEmpty) return '--';
     switch (levelKey.toLowerCase()) {
       case 'sedentary':
         return 'Sedentary (Little/No exercise)';
@@ -140,7 +176,7 @@ class UserInfoCard extends StatelessWidget {
       case 'very_active':
         return 'Very Active (Hard exercise/job)';
       default:
-        return 'Moderately Active';
+        return '--';
     }
   }
 }

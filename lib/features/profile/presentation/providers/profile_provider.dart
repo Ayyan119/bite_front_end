@@ -11,12 +11,11 @@ final profileNotifierProvider =
     );
 
 class ProfileNotifier extends AsyncNotifier<UserProfileResponseModel> {
-  late final ProfileRepository _repository;
+  ProfileRepository get _repository => ref.read(profileRepositoryProvider);
 
   @override
   FutureOr<UserProfileResponseModel> build() async {
-    _repository = ref.watch(profileRepositoryProvider);
-    return await _repository.getProfile();
+    return await ref.watch(profileRepositoryProvider).getProfile();
   }
 
   Future<void> fetchProfile() async {

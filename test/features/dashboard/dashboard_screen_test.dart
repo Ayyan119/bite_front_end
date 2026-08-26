@@ -91,9 +91,9 @@ void main() {
       expect(find.text('1872'), findsOneWidget);
       expect(find.text('of 2400 kcal'), findsOneWidget);
       expect(find.text('528 kcal remaining'), findsOneWidget);
-      expect(find.text('Protein'), findsOneWidget);
-      expect(find.text('Carbs'), findsOneWidget);
-      expect(find.text('Fat'), findsOneWidget);
+      expect(find.text('Protein'), findsWidgets);
+      expect(find.text('Carbs'), findsWidgets);
+      expect(find.text('Fat'), findsWidgets);
       expect(find.text('Banana Snack'), findsOneWidget);
       expect(find.text('Macro Trends'), findsOneWidget);
     },

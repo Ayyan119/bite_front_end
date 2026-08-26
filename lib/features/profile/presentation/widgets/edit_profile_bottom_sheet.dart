@@ -29,6 +29,31 @@ class _EditProfileBottomSheetState
   late String _selectedPrimaryGoal;
   bool _isSaving = false;
 
+  String _normalizeGender(String raw) {
+    final val = raw.toLowerCase().trim();
+    if (val.startsWith('f') || val.contains('female')) return 'female';
+    return 'male';
+  }
+
+  String _normalizeActivityLevel(String raw) {
+    final val = raw.toLowerCase().trim();
+    if (val.contains('sedentary')) return 'sedentary';
+    if (val.contains('light')) return 'light';
+    if (val.contains('moderate')) return 'moderate';
+    if (val.contains('very')) return 'very_active';
+    if (val.contains('active')) return 'active';
+    return 'moderate';
+  }
+
+  String _normalizePrimaryGoal(String raw) {
+    final val = raw.toLowerCase().trim();
+    if (val.contains('weight') || val.contains('fat') || val.contains('loss')) {
+      return 'fat_loss';
+    }
+    if (val.contains('muscle') || val.contains('gain')) return 'muscle_gain';
+    return 'maintenance';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -41,9 +66,11 @@ class _EditProfileBottomSheetState
       text: widget.profile.weightKg.toStringAsFixed(1),
     );
 
-    _selectedGender = widget.profile.gender.toLowerCase();
-    _selectedActivityLevel = widget.profile.activityLevel.toLowerCase();
-    _selectedPrimaryGoal = widget.profile.primaryGoal.toLowerCase();
+    _selectedGender = _normalizeGender(widget.profile.gender);
+    _selectedActivityLevel = _normalizeActivityLevel(
+      widget.profile.activityLevel,
+    );
+    _selectedPrimaryGoal = _normalizePrimaryGoal(widget.profile.primaryGoal);
   }
 
   @override
@@ -102,13 +129,10 @@ class _EditProfileBottomSheetState
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return Container(
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       padding: EdgeInsets.only(
         top: 20,
@@ -125,13 +149,11 @@ class _EditProfileBottomSheetState
             children: [
               Center(
                 child: Container(
-                  width: 40,
-                  height: 4,
+                  width: 44,
+                  height: 5,
                   decoration: BoxDecoration(
-                    color: isDark
-                        ? AppColors.borderDark
-                        : AppColors.borderLight,
-                    borderRadius: BorderRadius.circular(2),
+                    color: const Color(0xFFCBD5E1),
+                    borderRadius: BorderRadius.circular(3),
                   ),
                 ),
               ),
@@ -139,17 +161,19 @@ class _EditProfileBottomSheetState
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     'Edit Profile Metrics',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: isDark
-                          ? AppColors.darkTextPrimary
-                          : AppColors.lightTextPrimary,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF0F172A),
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: Color(0xFF64748B),
+                    ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -159,14 +183,31 @@ class _EditProfileBottomSheetState
               // Display Name
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
+                style: const TextStyle(
+                  color: Color(0xFF0F172A),
+                  fontWeight: FontWeight.w700,
+                ),
+                decoration: InputDecoration(
                   labelText: 'Display Name',
-                  prefixIcon: Icon(Icons.person_outline),
+                  prefixIcon: const Icon(
+                    Icons.person_outline,
+                    color: AppColors.secondary,
+                  ),
+                  filled: true,
+                  fillColor: const Color(0xFFF8FAFC),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
                 ),
                 validator: (val) =>
                     val == null || val.trim().isEmpty ? 'Name required' : null,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
 
               // Age, Height, Weight Row
               Row(
@@ -175,9 +216,27 @@ class _EditProfileBottomSheetState
                     child: TextFormField(
                       controller: _ageController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
+                      style: const TextStyle(
+                        color: Color(0xFF0F172A),
+                        fontWeight: FontWeight.w700,
+                      ),
+                      decoration: InputDecoration(
                         labelText: 'Age',
                         suffixText: 'yrs',
+                        filled: true,
+                        fillColor: const Color(0xFFF8FAFC),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE2E8F0),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE2E8F0),
+                          ),
+                        ),
                       ),
                       validator: (val) => (int.tryParse(val ?? '') ?? 0) <= 0
                           ? 'Invalid'
@@ -189,9 +248,27 @@ class _EditProfileBottomSheetState
                     child: TextFormField(
                       controller: _heightController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
+                      style: const TextStyle(
+                        color: Color(0xFF0F172A),
+                        fontWeight: FontWeight.w700,
+                      ),
+                      decoration: InputDecoration(
                         labelText: 'Height',
                         suffixText: 'cm',
+                        filled: true,
+                        fillColor: const Color(0xFFF8FAFC),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE2E8F0),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE2E8F0),
+                          ),
+                        ),
                       ),
                       validator: (val) => (double.tryParse(val ?? '') ?? 0) <= 0
                           ? 'Invalid'
@@ -205,9 +282,27 @@ class _EditProfileBottomSheetState
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      decoration: const InputDecoration(
+                      style: const TextStyle(
+                        color: Color(0xFF0F172A),
+                        fontWeight: FontWeight.w700,
+                      ),
+                      decoration: InputDecoration(
                         labelText: 'Weight',
                         suffixText: 'kg',
+                        filled: true,
+                        fillColor: const Color(0xFFF8FAFC),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE2E8F0),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE2E8F0),
+                          ),
+                        ),
                       ),
                       validator: (val) => (double.tryParse(val ?? '') ?? 0) <= 0
                           ? 'Invalid'
@@ -219,17 +314,46 @@ class _EditProfileBottomSheetState
               const SizedBox(height: 16),
 
               // Gender Selector
-              Text(
+              const Text(
                 'Gender',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: isDark
-                      ? AppColors.darkTextPrimary
-                      : AppColors.lightTextPrimary,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF0F172A),
                 ),
               ),
               const SizedBox(height: 8),
               SegmentedButton<String>(
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.resolveWith<Color>((
+                    states,
+                  ) {
+                    if (states.contains(WidgetState.selected)) {
+                      return AppColors.secondary;
+                    }
+                    return const Color(0xFFF8FAFC);
+                  }),
+                  foregroundColor: WidgetStateProperty.resolveWith<Color>((
+                    states,
+                  ) {
+                    if (states.contains(WidgetState.selected)) {
+                      return Colors.white;
+                    }
+                    return const Color(0xFF334155);
+                  }),
+                  iconColor: WidgetStateProperty.resolveWith<Color>((states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return Colors.white;
+                    }
+                    return const Color(0xFF64748B);
+                  }),
+                  side: WidgetStateProperty.all<BorderSide>(
+                    const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
+                  textStyle: WidgetStateProperty.all<TextStyle>(
+                    const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                  ),
+                ),
                 segments: const [
                   ButtonSegment(
                     value: 'male',
@@ -252,13 +376,12 @@ class _EditProfileBottomSheetState
               const SizedBox(height: 16),
 
               // Primary Goal Chips
-              Text(
+              const Text(
                 'Primary Goal',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: isDark
-                      ? AppColors.darkTextPrimary
-                      : AppColors.lightTextPrimary,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF0F172A),
                 ),
               ),
               const SizedBox(height: 8),
@@ -272,22 +395,34 @@ class _EditProfileBottomSheetState
               ),
               const SizedBox(height: 16),
 
-              // Activity Level Dropdown / Choice Chips
-              Text(
+              // Activity Level Dropdown
+              const Text(
                 'Activity Level',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: isDark
-                      ? AppColors.darkTextPrimary
-                      : AppColors.lightTextPrimary,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF0F172A),
                 ),
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 initialValue: _selectedActivityLevel,
-                decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.fitness_center_rounded),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(
+                    Icons.fitness_center_rounded,
+                    color: AppColors.secondary,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                  filled: true,
+                  fillColor: const Color(0xFFF8FAFC),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
                 ),
                 items: const [
                   DropdownMenuItem(
@@ -322,34 +457,49 @@ class _EditProfileBottomSheetState
               const SizedBox(height: 24),
 
               // Submit Button
-              SizedBox(
+              Container(
                 width: double.infinity,
+                height: 52,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.secondary, Color(0xFFFF7700)],
+                  ),
+                  borderRadius: AppRadius.pillBorder,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.secondary.withValues(alpha: 0.40),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
                 child: ElevatedButton(
                   onPressed: _isSaving ? null : _handleSave,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: AppRadius.pillBorder,
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    elevation: 0,
                   ),
                   child: _isSaving
                       ? const SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
-                            ),
+                            strokeWidth: 2.5,
+                            color: Colors.white,
                           ),
                         )
                       : const Text(
                           'Save Changes',
                           style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.8,
+                            color: Colors.white,
                           ),
                         ),
                 ),
@@ -364,9 +514,21 @@ class _EditProfileBottomSheetState
   Widget _buildGoalChip(String value, String label) {
     final isSelected = _selectedPrimaryGoal == value;
     return ChoiceChip(
-      label: Text(label),
+      label: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+          color: isSelected ? Colors.white : const Color(0xFF334155),
+        ),
+      ),
       selected: isSelected,
-      selectedColor: AppColors.primaryContainer,
+      selectedColor: AppColors.secondary,
+      backgroundColor: const Color(0xFFF8FAFC),
+      side: BorderSide(
+        color: isSelected ? AppColors.secondary : const Color(0xFFE2E8F0),
+      ),
+      showCheckmark: false,
       onSelected: (selected) {
         if (selected) {
           setState(() {

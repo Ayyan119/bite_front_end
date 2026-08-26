@@ -8,8 +8,15 @@ final selectedDashboardDateProvider = StateProvider<DateTime>((ref) {
   return DateTime.now();
 });
 
+enum TrendMetric { calories, protein, carbs, fat }
+
+// Currently selected metric for trends contribution board (defaults to calories)
+final selectedTrendMetricProvider = StateProvider<TrendMetric>(
+  (ref) => TrendMetric.calories,
+);
+
 // Currently selected historical range in days (7 or 30 days)
-final historicalRangeDaysProvider = StateProvider<int>((ref) => 7);
+final historicalRangeDaysProvider = StateProvider<int>((ref) => 30);
 
 // Helper extension to format DateTime as YYYY-MM-DD string
 String formatDateString(DateTime date) {
@@ -25,6 +32,8 @@ final dailyDashboardProvider =
       ref,
       dateStr,
     ) async {
+      // Keep provider alive in memory so date switching shows zero loading delay
+      ref.keepAlive();
       final repository = ref.watch(dashboardRepositoryProvider);
       return repository.getDailyDashboard(dateStr);
     });

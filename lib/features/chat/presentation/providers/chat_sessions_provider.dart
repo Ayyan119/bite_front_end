@@ -10,12 +10,11 @@ final chatSessionsProvider =
 
 class ChatSessionsNotifier
     extends AsyncNotifier<List<ChatSessionResponseModel>> {
-  late final ChatRepository _repository;
+  ChatRepository get _repository => ref.read(chatRepositoryProvider);
 
   @override
   FutureOr<List<ChatSessionResponseModel>> build() async {
-    _repository = ref.watch(chatRepositoryProvider);
-    return await _repository.getSessions();
+    return await ref.watch(chatRepositoryProvider).getSessions();
   }
 
   Future<void> fetchSessions() async {
@@ -42,6 +41,21 @@ class ChatSessionsNotifier
       state = AsyncValue.data(
         currentList.where((s) => s.id != sessionId).toList(),
       );
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+    }
+  }
+
+  Future<void> clearAllSessions() async {
+    final currentList = state.value ?? [];
+    if (currentList.isEmpty) return;
+
+    try {
+      // Delete all sessions on backend
+      await Future.wait(
+        currentList.map((s) => _repository.deleteSession(s.id)),
+      );
+      state = const AsyncValue.data([]);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }

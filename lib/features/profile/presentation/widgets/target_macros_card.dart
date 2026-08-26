@@ -10,19 +10,23 @@ class TargetMacrosCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final proteinVal = profile.targetProteinG > 0
+        ? profile.targetProteinG
+        : 50.0;
+    final carbsVal = profile.targetCarbsG > 0 ? profile.targetCarbsG : 275.0;
+    final fatVal = profile.targetFatG > 0 ? profile.targetFatG : 67.0;
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(20.0),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkCard : AppColors.lightSurface,
-        borderRadius: AppRadius.lgBorder,
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 16,
             offset: const Offset(0, 4),
           ),
         ],
@@ -30,41 +34,67 @@ class TargetMacrosCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Target Macro Split',
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: isDark
-                  ? AppColors.darkTextPrimary
-                  : AppColors.lightTextPrimary,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Expanded(
+                child: Text(
+                  'TARGET MACRO SPLIT',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.2,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: AppRadius.pillBorder,
+                ),
+                child: const Text(
+                  '📊 Daily Distribution',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF475569),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 18),
           _buildMacroRow(
-            context: context,
+            emoji: '🍗',
             label: 'Protein Target',
-            value: '${profile.targetProteinG.round()} g',
+            value: '${proteinVal.round()} g',
             color: AppColors.protein,
-            percentage: 0.30,
-            isDark: isDark,
+            bgTint: const Color(0xFFFFF7ED),
+            percentage: 0.0, // 0% consumed until user logs food
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           _buildMacroRow(
-            context: context,
+            emoji: '🍞',
             label: 'Carbs Target',
-            value: '${profile.targetCarbsG.round()} g',
+            value: '${carbsVal.round()} g',
             color: AppColors.carbs,
-            percentage: 0.50,
-            isDark: isDark,
+            bgTint: const Color(0xFFFEF3C7),
+            percentage: 0.0, // 0% consumed until user logs food
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           _buildMacroRow(
-            context: context,
+            emoji: '🥑',
             label: 'Fat Target',
-            value: '${profile.targetFatG.round()} g',
+            value: '${fatVal.round()} g',
             color: AppColors.fat,
-            percentage: 0.20,
-            isDark: isDark,
+            bgTint: const Color(0xFFECFDF5),
+            percentage: 0.0, // 0% consumed until user logs food
           ),
         ],
       ),
@@ -72,65 +102,81 @@ class TargetMacrosCard extends StatelessWidget {
   }
 
   Widget _buildMacroRow({
-    required BuildContext context,
+    required String emoji,
     required String label,
     required String value,
     required Color color,
+    required Color bgTint,
     required double percentage,
-    required bool isDark,
   }) {
-    final theme = Theme.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: color,
-                    shape: BoxShape.circle,
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: bgTint,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(emoji, style: const TextStyle(fontSize: 14)),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: isDark
-                        ? AppColors.darkTextPrimary
-                        : AppColors.lightTextPrimary,
+                  const SizedBox(width: 10),
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF0F172A),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            Text(
-              value,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
+                ],
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        ClipRRect(
-          borderRadius: AppRadius.pillBorder,
-          child: LinearProgressIndicator(
-            value: percentage,
-            minHeight: 6,
-            backgroundColor: isDark
-                ? AppColors.darkBackground
-                : AppColors.borderLight,
-            valueColor: AlwaysStoppedAnimation<Color>(color),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: AppRadius.pillBorder,
+                ),
+                child: Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                    color: color,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-      ],
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: AppRadius.pillBorder,
+            child: LinearProgressIndicator(
+              value: percentage,
+              minHeight: 8,
+              backgroundColor: const Color(0xFFE2E8F0),
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

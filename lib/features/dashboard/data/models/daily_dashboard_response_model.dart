@@ -9,11 +9,20 @@ class MacroProgressModel {
     required this.remaining,
   });
 
-  factory MacroProgressModel.fromJson(Map<String, dynamic> json) {
+  factory MacroProgressModel.fromJson(
+    Map<String, dynamic> json, {
+    double defaultTarget = 0.0,
+  }) {
+    final rawTarget = (json['target'] as num?)?.toDouble() ?? 0.0;
+    final target = rawTarget > 0 ? rawTarget : defaultTarget;
+    final consumed = (json['consumed'] as num?)?.toDouble() ?? 0.0;
+    final rawRemaining = (json['remaining'] as num?)?.toDouble() ?? 0.0;
+    final remaining = rawTarget > 0 ? rawRemaining : (target - consumed);
+
     return MacroProgressModel(
-      target: (json['target'] as num?)?.toDouble() ?? 0.0,
-      consumed: (json['consumed'] as num?)?.toDouble() ?? 0.0,
-      remaining: (json['remaining'] as num?)?.toDouble() ?? 0.0,
+      target: target,
+      consumed: consumed,
+      remaining: remaining,
     );
   }
 
@@ -105,20 +114,32 @@ class DailyDashboardResponseModel {
       (key, value) => MapEntry(key, (value as num).toDouble()),
     );
 
+    final rawTarget = (json['target_calories'] as num?)?.toDouble() ?? 0.0;
+    final targetCalories = rawTarget > 0 ? rawTarget : 2000.0;
+    final consumedCalories =
+        (json['consumed_calories'] as num?)?.toDouble() ?? 0.0;
+    final rawRemaining =
+        (json['remaining_calories'] as num?)?.toDouble() ?? 0.0;
+    final remainingCalories = rawTarget > 0
+        ? rawRemaining
+        : (targetCalories - consumedCalories);
+
     return DailyDashboardResponseModel(
       date: json['date'] as String? ?? '',
-      targetCalories: (json['target_calories'] as num?)?.toDouble() ?? 0.0,
-      consumedCalories: (json['consumed_calories'] as num?)?.toDouble() ?? 0.0,
-      remainingCalories:
-          (json['remaining_calories'] as num?)?.toDouble() ?? 0.0,
+      targetCalories: targetCalories,
+      consumedCalories: consumedCalories,
+      remainingCalories: remainingCalories,
       protein: MacroProgressModel.fromJson(
         json['protein'] as Map<String, dynamic>? ?? {},
+        defaultTarget: 50.0,
       ),
       carbs: MacroProgressModel.fromJson(
         json['carbs'] as Map<String, dynamic>? ?? {},
+        defaultTarget: 275.0,
       ),
       fat: MacroProgressModel.fromJson(
         json['fat'] as Map<String, dynamic>? ?? {},
+        defaultTarget: 67.0,
       ),
       meals:
           (json['meals'] as List<dynamic>?)

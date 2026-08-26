@@ -85,4 +85,9 @@ class FakeProfileNotifier extends ProfileNotifier {
   Future<UserProfileResponseModel> build() async {
     return mockProfile;
   }
+
+  @override
+  Future<void> fetchProfile() async {
+    state = AsyncValue.data(mockProfile);
+  }
 }

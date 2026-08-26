@@ -25,16 +25,29 @@ class MealAnalysisState {
   final String? errorMessage;
   final MealConfirmResponseModel? lastConfirmedMeal;
 
-  const MealAnalysisState({
+  MealAnalysisState({
     this.status = MealAnalysisStatus.initial,
     this.selectedFile,
     this.imageUrl,
     this.userCaption = '',
-    this.selectedMealType = 'snack',
+    String? selectedMealType,
     this.items = const [],
     this.errorMessage,
     this.lastConfirmedMeal,
-  });
+  }) : selectedMealType = selectedMealType ?? _getDefaultMealTypeForTime();
+
+  static String _getDefaultMealTypeForTime() {
+    final hour = DateTime.now().hour;
+    if (hour >= 5 && hour < 11) {
+      return 'breakfast';
+    } else if (hour >= 11 && hour < 16) {
+      return 'lunch';
+    } else if (hour >= 16 && hour < 23) {
+      return 'dinner';
+    } else {
+      return 'snack';
+    }
+  }
 
   MealAnalysisState copyWith({
     MealAnalysisStatus? status,
@@ -71,7 +84,7 @@ class MealAnalysisNotifier extends StateNotifier<MealAnalysisState> {
   final Ref _ref;
 
   MealAnalysisNotifier(this._repository, this._ref)
-    : super(const MealAnalysisState());
+    : super(MealAnalysisState());
 
   void setSelectedFile(XFile? file) {
     state = state.copyWith(selectedFile: () => file, errorMessage: () => null);
@@ -196,8 +209,23 @@ class MealAnalysisNotifier extends StateNotifier<MealAnalysisState> {
 
       final response = await _repository.confirmMeal(request);
 
-      _ref.invalidate(dailyDashboardProvider);
-      _ref.invalidate(historicalAnalyticsProvider);
+      final now = DateTime.now();
+      final todayStr = formatDateString(now);
+      final selectedDate = _ref.read(selectedDashboardDateProvider);
+      final selectedDateStr = formatDateString(selectedDate);
+      final yesterdayStr = formatDateString(
+        now.subtract(const Duration(days: 1)),
+      );
+      final twoDaysAgoStr = formatDateString(
+        now.subtract(const Duration(days: 2)),
+      );
+
+      _ref.invalidate(dailyDashboardProvider(todayStr));
+      _ref.invalidate(dailyDashboardProvider(selectedDateStr));
+      _ref.invalidate(dailyDashboardProvider(yesterdayStr));
+      _ref.invalidate(dailyDashboardProvider(twoDaysAgoStr));
+      _ref.invalidate(historicalAnalyticsProvider(7));
+      _ref.invalidate(historicalAnalyticsProvider(30));
 
       state = state.copyWith(
         status: MealAnalysisStatus.success,
@@ -214,6 +242,6 @@ class MealAnalysisNotifier extends StateNotifier<MealAnalysisState> {
   }
 
   void reset() {
-    state = const MealAnalysisState();
+    state = MealAnalysisState();
   }
 }

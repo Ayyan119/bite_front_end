@@ -15,9 +15,6 @@ class ProfileHeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     final initials = profile.displayName.isNotEmpty
         ? profile.displayName
               .trim()
@@ -31,13 +28,19 @@ class ProfileHeaderCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20.0),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkCard : AppColors.lightSurface,
-        borderRadius: AppRadius.lgBorder,
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 16,
             offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: AppColors.secondary.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -45,14 +48,31 @@ class ProfileHeaderCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 32,
-                backgroundColor: AppColors.primaryContainer,
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    colors: [AppColors.secondary, Color(0xFFFF7700)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.secondary.withValues(alpha: 0.35),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                alignment: Alignment.center,
                 child: Text(
                   initials,
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    color: AppColors.primaryDark,
-                    fontWeight: FontWeight.bold,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
                   ),
                 ),
               ),
@@ -65,28 +85,30 @@ class ProfileHeaderCard extends StatelessWidget {
                       profile.displayName.isNotEmpty
                           ? profile.displayName
                           : 'Bite User',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: isDark
-                            ? AppColors.darkTextPrimary
-                            : AppColors.lightTextPrimary,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF0F172A),
+                        letterSpacing: -0.2,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primaryContainer,
+                        color: const Color(0xFFF1F5F9),
                         borderRadius: AppRadius.pillBorder,
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
                       ),
                       child: Text(
                         _formatGoalLabel(profile.primaryGoal),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: AppColors.primaryDark,
-                          fontWeight: FontWeight.bold,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF334155),
                         ),
                       ),
                     ),
@@ -95,20 +117,49 @@ class ProfileHeaderCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          SizedBox(
+          const SizedBox(height: 18),
+          Container(
             width: double.infinity,
-            child: OutlinedButton.icon(
+            height: 48,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [AppColors.secondary, Color(0xFFFF7700)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: AppRadius.pillBorder,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.secondary.withValues(alpha: 0.35),
+                  blurRadius: 14,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ElevatedButton.icon(
               onPressed: onEditPressed,
-              icon: const Icon(Icons.edit_outlined, size: 18),
-              label: const Text('Edit Physical Metrics & Goals'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                side: const BorderSide(color: AppColors.primary),
+              icon: const Icon(
+                Icons.tune_rounded,
+                size: 18,
+                color: Colors.white,
+              ),
+              label: const Text(
+                'Edit Physical Metrics & Goals',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.5,
+                  color: Colors.white,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: AppRadius.pillBorder,
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                elevation: 0,
               ),
             ),
           ),
@@ -118,14 +169,17 @@ class ProfileHeaderCard extends StatelessWidget {
   }
 
   String _formatGoalLabel(String goalKey) {
+    if (goalKey.isEmpty) return '🎯 Goal Not Set';
     switch (goalKey.toLowerCase()) {
       case 'muscle_gain':
         return '💪 Muscle Gain';
       case 'fat_loss':
+      case 'weight_loss':
         return '🔥 Fat Loss';
       case 'maintenance':
-      default:
         return '⚖️ Weight Maintenance';
+      default:
+        return '🎯 Goal Not Set';
     }
   }
 }

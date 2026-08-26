@@ -50,6 +50,14 @@ class StorageService {
     };
   }
 
+  Future<bool> saveCachedProfile(String profileJson) async {
+    return await _prefs.setString('cached_user_profile', profileJson);
+  }
+
+  String? getCachedProfile() {
+    return _prefs.getString('cached_user_profile');
+  }
+
   Future<bool> clearAll() async {
     return await _prefs.clear();
   }

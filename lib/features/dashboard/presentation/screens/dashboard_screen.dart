@@ -1,16 +1,21 @@
+import 'package:bite_front_end/core/theme/app_colors.dart';
+import 'package:bite_front_end/core/theme/app_spacing.dart';
+import 'package:bite_front_end/core/widgets/app_button.dart';
+import 'package:bite_front_end/core/widgets/app_card.dart';
+import 'package:bite_front_end/core/widgets/bite_fade_slide.dart';
+import 'package:bite_front_end/core/widgets/bite_shimmer.dart';
+import 'package:bite_front_end/features/dashboard/presentation/providers/dashboard_provider.dart';
+import 'package:bite_front_end/features/dashboard/presentation/widgets/calorie_progress_ring.dart';
+import 'package:bite_front_end/features/dashboard/presentation/widgets/date_selector_bar.dart';
+import 'package:bite_front_end/features/dashboard/presentation/widgets/historical_analytics_chart.dart';
+import 'package:bite_front_end/features/dashboard/presentation/widgets/logged_meals_list.dart';
+import 'package:bite_front_end/features/dashboard/presentation/widgets/macro_cards_grid.dart';
+import 'package:bite_front_end/features/dashboard/presentation/widgets/top_micronutrients_card.dart';
+import 'package:bite_front_end/features/meals/presentation/providers/meal_analysis_notifier.dart';
+import 'package:bite_front_end/features/meals/presentation/providers/meal_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_card.dart';
-import '../providers/dashboard_provider.dart';
-import '../widgets/calorie_progress_ring.dart';
-import '../widgets/date_selector_bar.dart';
-import '../widgets/historical_analytics_chart.dart';
-import '../widgets/logged_meals_list.dart';
-import '../widgets/macro_card_grid.dart';
-import '../widgets/top_micronutrients_card.dart';
+import 'package:go_router/go_router.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -19,13 +24,39 @@ class DashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedDate = ref.watch(selectedDashboardDateProvider);
     final dateStr = formatDateString(selectedDate);
+
+    // Prime in-memory cache for the last 3 days (Today, Yesterday, 2 Days Ago) so date switching is instant
+    final now = DateTime.now();
+    final todayStr = formatDateString(now);
+    final yesterdayStr = formatDateString(
+      now.subtract(const Duration(days: 1)),
+    );
+    final twoDaysAgoStr = formatDateString(
+      now.subtract(const Duration(days: 2)),
+    );
+
+    ref.listen(dailyDashboardProvider(todayStr), (prev, next) {});
+    ref.listen(dailyDashboardProvider(yesterdayStr), (prev, next) {});
+    ref.listen(dailyDashboardProvider(twoDaysAgoStr), (prev, next) {});
+
+    // Automatically trigger state refresh on Dashboard whenever a new meal is logged
+    ref.listen(mealAnalysisNotifierProvider, (prev, next) {
+      if (next.status == MealAnalysisStatus.success) {
+        ref.invalidate(dailyDashboardProvider(dateStr));
+        ref.invalidate(dailyDashboardProvider(todayStr));
+        ref.invalidate(historicalAnalyticsProvider(7));
+        ref.invalidate(historicalAnalyticsProvider(30));
+      }
+    });
+
     final dashboardAsync = ref.watch(dailyDashboardProvider(dateStr));
 
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
       body: SafeArea(
         child: RefreshIndicator(
-          color: AppColors.primary,
+          color: AppColors.secondary,
+          backgroundColor: Colors.white,
           onRefresh: () async {
             ref.invalidate(dailyDashboardProvider(dateStr));
             ref.invalidate(historicalAnalyticsProvider);
@@ -42,57 +73,80 @@ class DashboardScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    // Date Selection Capsule Bar (Today, Yesterday, no tomorrow)
                     const DateSelectorBar(),
                     const SizedBox(height: AppSpacing.lg),
+
                     dashboardAsync.when(
                       data: (dashboard) {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            CalorieProgressRing(
-                              targetCalories: dashboard.targetCalories,
-                              consumedCalories: dashboard.consumedCalories,
-                              remainingCalories: dashboard.remainingCalories,
-                            ),
-                            const SizedBox(height: AppSpacing.md),
-                            MacroCardGrid(
-                              protein: dashboard.protein,
-                              carbs: dashboard.carbs,
-                              fat: dashboard.fat,
+                            BiteFadeSlide(
+                              delay: Duration.zero,
+                              duration: const Duration(milliseconds: 400),
+                              child: CalorieProgressRing(
+                                targetCalories: dashboard.targetCalories,
+                                consumedCalories: dashboard.consumedCalories,
+                                remainingCalories: dashboard.remainingCalories,
+                                onLogMealPressed: () =>
+                                    context.push('/meals/log'),
+                              ),
                             ),
                             const SizedBox(height: AppSpacing.lg),
-                            LoggedMealsList(meals: dashboard.meals),
+                            BiteFadeSlide(
+                              delay: const Duration(milliseconds: 100),
+                              duration: const Duration(milliseconds: 400),
+                              child: MacroCardsGrid(
+                                currentProteinG: dashboard.protein.consumed,
+                                targetProteinG: dashboard.protein.target,
+                                currentCarbsG: dashboard.carbs.consumed,
+                                targetCarbsG: dashboard.carbs.target,
+                                currentFatG: dashboard.fat.consumed,
+                                targetFatG: dashboard.fat.target,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
+                            BiteFadeSlide(
+                              delay: const Duration(milliseconds: 200),
+                              duration: const Duration(milliseconds: 400),
+                              child: LoggedMealsList(meals: dashboard.meals),
+                            ),
                             if (dashboard.topMicronutrients.isNotEmpty) ...[
                               const SizedBox(height: AppSpacing.lg),
-                              TopMicronutrientsCard(
-                                topMicronutrients: dashboard.topMicronutrients,
+                              BiteFadeSlide(
+                                delay: const Duration(milliseconds: 300),
+                                duration: const Duration(milliseconds: 400),
+                                child: TopMicronutrientsCard(
+                                  topMicronutrients:
+                                      dashboard.topMicronutrients,
+                                ),
                               ),
                             ],
                             const SizedBox(height: AppSpacing.lg),
-                            const HistoricalAnalyticsChart(),
+                            const BiteFadeSlide(
+                              delay: Duration(milliseconds: 400),
+                              duration: Duration(milliseconds: 400),
+                              child: HistoricalAnalyticsChart(),
+                            ),
+                            const SizedBox(height: 90),
                           ],
                         );
                       },
-                      loading: () => const Column(
-                        children: [
-                          SizedBox(height: 60),
-                          Center(
-                            child: CircularProgressIndicator(
-                              color: AppColors.primary,
-                            ),
-                          ),
-                          SizedBox(height: 16),
-                          Text(
-                            'Loading your daily macro dashboard...',
-                            style: TextStyle(
-                              color: AppColors.lightTextSecondary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          SizedBox(height: 60),
-                        ],
+                      loading: () => BiteShimmer(
+                        child: Column(
+                          children: const [
+                            SizedBox(height: 20),
+                            BiteShimmerBox(width: double.infinity, height: 260),
+                            SizedBox(height: 16),
+                            BiteShimmerBox(width: double.infinity, height: 100),
+                            SizedBox(height: 16),
+                            BiteShimmerBox(width: double.infinity, height: 150),
+                          ],
+                        ),
                       ),
                       error: (error, stackTrace) => AppCard(
+                        backgroundColor: Colors.white,
                         padding: const EdgeInsets.all(AppSpacing.xl),
                         child: Column(
                           children: [

@@ -107,15 +107,51 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final data = e.response!.data as Map<String, dynamic>;
       if (data.containsKey('detail')) {
         final detail = data['detail'];
-        if (detail is String) return detail;
+        if (detail is String && detail.isNotEmpty) {
+          final lower = detail.toLowerCase();
+          if (lower.contains('already') ||
+              lower.contains('exist') ||
+              lower.contains('registered') ||
+              lower.contains('duplicate')) {
+            return 'Email address is already registered. Please log in instead.';
+          }
+          return detail;
+        }
         if (detail is List && detail.isNotEmpty) {
+          final first = detail.first;
+          if (first is Map) {
+            final msg = first['msg']?.toString() ?? first.toString();
+            final field =
+                (first['loc'] is List && (first['loc'] as List).isNotEmpty)
+                ? "${(first['loc'] as List).last}: "
+                : "";
+            return "$field$msg";
+          }
           return detail.first.toString();
         }
       }
-      if (data.containsKey('message')) {
+      if (data.containsKey('message') && data['message'] != null) {
         return data['message'].toString();
       }
     }
-    return e.message;
+
+    final statusCode = e.response?.statusCode;
+    if (statusCode == 401) {
+      return 'Incorrect email or password. Please try again.';
+    }
+    if (statusCode == 409) {
+      return 'An account with this email address already exists.';
+    }
+    if (statusCode == 422) {
+      return 'Invalid input details. Please check your information and try again.';
+    }
+
+    if (e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.connectionError) {
+      return 'Unable to connect to server. Please check your connection.';
+    }
+
+    return e.message ?? 'Authentication error. Please check your details.';
   }
 }

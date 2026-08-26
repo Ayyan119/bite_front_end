@@ -1,126 +1,158 @@
+import 'package:bite_front_end/core/theme/app_colors.dart';
+import 'package:bite_front_end/core/theme/app_radius.dart';
+import 'package:bite_front_end/features/dashboard/presentation/providers/dashboard_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_radius.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../providers/dashboard_provider.dart';
 
 class DateSelectorBar extends ConsumerWidget {
   const DateSelectorBar({super.key});
-
-  void _changeDate(WidgetRef ref, int daysOffset) {
-    final currentDate = ref.read(selectedDashboardDateProvider);
-    ref.read(selectedDashboardDateProvider.notifier).state = currentDate.add(
-      Duration(days: daysOffset),
-    );
-  }
-
-  Future<void> _selectDate(BuildContext context, WidgetRef ref) async {
-    final currentDate = ref.read(selectedDashboardDateProvider);
-    final pickedDate = await showDatePicker(
-      context: context,
-      initialDate: currentDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.primary,
-              onPrimary: Colors.white,
-              surface: AppColors.lightSurface,
-              onSurface: AppColors.lightTextPrimary,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (pickedDate != null) {
-      ref.read(selectedDashboardDateProvider.notifier).state = pickedDate;
-    }
-  }
-
-  String _formatDisplayDate(DateTime date) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final target = DateTime(date.year, date.month, date.day);
-
-    if (target == today) {
-      return 'Today, ${DateFormat('MMM d').format(date)}';
-    } else if (target == today.subtract(const Duration(days: 1))) {
-      return 'Yesterday, ${DateFormat('MMM d').format(date)}';
-    } else if (target == today.add(const Duration(days: 1))) {
-      return 'Tomorrow, ${DateFormat('MMM d').format(date)}';
-    }
-    return DateFormat('EEE, MMM d, yyyy').format(date);
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedDate = ref.watch(selectedDashboardDateProvider);
 
+    final now = DateTime.now();
+    final todayDate = DateTime(now.year, now.month, now.day);
+    final currentDate = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+    );
+    final yesterdayDate = todayDate.subtract(const Duration(days: 1));
+
+    final isToday = currentDate.isAtSameMomentAs(todayDate);
+    final isYesterday = currentDate.isAtSameMomentAs(yesterdayDate);
+
+    String formattedDate;
+    if (isToday) {
+      formattedDate = 'Today, ${DateFormat('MMM d').format(selectedDate)}';
+    } else if (isYesterday) {
+      formattedDate = 'Yesterday, ${DateFormat('MMM d').format(selectedDate)}';
+    } else {
+      formattedDate = DateFormat('EEEE, MMM d').format(selectedDate);
+    }
+
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.lightSurface,
+        color: Colors.white,
         borderRadius: AppRadius.pillBorder,
-        border: Border.all(color: AppColors.inputBorder, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.05),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
         ],
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          // Previous Day Chevron
           IconButton(
-            icon: const Icon(
-              Icons.chevron_left,
-              color: AppColors.lightTextPrimary,
-              size: 24,
+            onPressed: () {
+              ref.read(selectedDashboardDateProvider.notifier).state =
+                  currentDate.subtract(const Duration(days: 1));
+            },
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF1F5F9),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.chevron_left_rounded,
+                size: 20,
+                color: AppColors.lightTextPrimary,
+              ),
             ),
-            onPressed: () => _changeDate(ref, -1),
             tooltip: 'Previous Day',
           ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () => _selectDate(context, ref),
+
+          // Date Badge & Picker Trigger
+          GestureDetector(
+            onTap: () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: currentDate.isAfter(todayDate)
+                    ? todayDate
+                    : currentDate,
+                firstDate: DateTime(2020),
+                lastDate: todayDate, // Cannot select future dates!
+              );
+              if (picked != null) {
+                ref.read(selectedDashboardDateProvider.notifier).state =
+                    DateTime(picked.year, picked.month, picked.day);
+              }
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+              decoration: BoxDecoration(
+                color: isToday ? AppColors.primary : const Color(0xFF1E2025),
+                borderRadius: AppRadius.pillBorder,
+                boxShadow: [
+                  BoxShadow(
+                    color:
+                        (isToday ? AppColors.primary : const Color(0xFF1E2025))
+                            .withValues(alpha: 0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(
-                    Icons.calendar_today_outlined,
-                    size: 16,
-                    color: AppColors.primary,
+                    Icons.calendar_today_rounded,
+                    size: 15,
+                    color: Colors.white,
                   ),
-                  const SizedBox(width: AppSpacing.sm),
+                  const SizedBox(width: 8),
                   Text(
-                    _formatDisplayDate(selectedDate),
+                    formattedDate,
                     style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.lightTextPrimary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      letterSpacing: 0.2,
                     ),
                   ),
                 ],
               ),
             ),
           ),
+
+          // Next Day Chevron (Disabled when on Today, preventing future date navigation!)
           IconButton(
-            icon: const Icon(
-              Icons.chevron_right,
-              color: AppColors.lightTextPrimary,
-              size: 24,
+            onPressed: isToday
+                ? null
+                : () {
+                    final nextDate = currentDate.add(const Duration(days: 1));
+                    if (!nextDate.isAfter(todayDate)) {
+                      ref.read(selectedDashboardDateProvider.notifier).state =
+                          nextDate;
+                    }
+                  },
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: isToday
+                    ? const Color(0xFFF8FAFC)
+                    : const Color(0xFFF1F5F9),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.chevron_right_rounded,
+                size: 20,
+                color: isToday
+                    ? const Color(0xFFCBD5E1)
+                    : AppColors.lightTextPrimary,
+              ),
             ),
-            onPressed: () => _changeDate(ref, 1),
             tooltip: 'Next Day',
           ),
         ],

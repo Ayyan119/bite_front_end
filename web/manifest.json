@@ -1,11 +1,11 @@
 {
-    "name": "bite_front_end",
-    "short_name": "bite_front_end",
+    "name": "AI Bite",
+    "short_name": "AI Bite",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F8FAFC",
+    "theme_color": "#FF5500",
+    "description": "AI Bite - Intelligent Calorie & Macro Tracker",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

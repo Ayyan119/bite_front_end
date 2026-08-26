@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_radius.dart';
 import '../../data/models/meal_analysis_response_model.dart';
 
-class DetectedItemCard extends StatefulWidget {
+class DetectedItemCard extends StatelessWidget {
   final DetectedItemModel item;
   final ValueChanged<double> onPortionChanged;
   final VoidCallback onDelete;
@@ -16,46 +15,19 @@ class DetectedItemCard extends StatefulWidget {
   });
 
   @override
-  State<DetectedItemCard> createState() => _DetectedItemCardState();
-}
-
-class _DetectedItemCardState extends State<DetectedItemCard> {
-  bool _isTappedMinus = false;
-  bool _isTappedPlus = false;
-
-  void _increment() {
-    setState(() => _isTappedPlus = true);
-    widget.onPortionChanged(widget.item.portionAmount + 0.5);
-    Future.delayed(const Duration(milliseconds: 150), () {
-      if (mounted) setState(() => _isTappedPlus = false);
-    });
-  }
-
-  void _decrement() {
-    if (widget.item.portionAmount <= 0.5) return;
-    setState(() => _isTappedMinus = true);
-    widget.onPortionChanged(widget.item.portionAmount - 0.5);
-    Future.delayed(const Duration(milliseconds: 150), () {
-      if (mounted) setState(() => _isTappedMinus = false);
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final item = widget.item;
-
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: AppRadius.lgBorder,
-        border: Border.all(color: AppColors.borderLight),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -63,6 +35,7 @@ class _DetectedItemCardState extends State<DetectedItemCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: Column(
@@ -71,111 +44,102 @@ class _DetectedItemCardState extends State<DetectedItemCard> {
                     Text(
                       item.foodName,
                       style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.lightTextPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF0F172A),
+                        letterSpacing: -0.2,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
                     Text(
-                      '${item.gramWeight.round()}g • ${item.calories.round()} kcal',
+                      '${item.portionAmount % 1 == 0 ? item.portionAmount.round() : item.portionAmount} ${item.portionUnit} (${item.gramWeight.round()}g)',
                       style: const TextStyle(
                         fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.lightTextMuted,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF64748B),
                       ),
                     ),
                   ],
                 ),
               ),
-              // Quantity Stepper
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: _decrement,
-                    child: AnimatedScale(
-                      scale: _isTappedMinus ? 0.88 : 1.0,
-                      duration: const Duration(milliseconds: 100),
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: AppColors.lightBackground,
-                          borderRadius: AppRadius.smBorder,
-                          border: Border.all(color: AppColors.borderLight),
-                        ),
-                        child: const Icon(
-                          Icons.remove,
-                          size: 16,
-                          color: AppColors.lightTextPrimary,
-                        ),
-                      ),
-                    ),
+              const SizedBox(width: 8),
+              // Calorie Pill Badge
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF7ED),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.secondary.withValues(alpha: 0.25),
+                    width: 1.0,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: Text(
-                      '${item.portionAmount % 1 == 0 ? item.portionAmount.round() : item.portionAmount} ${item.portionUnit}',
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.local_fire_department_rounded,
+                      size: 14,
+                      color: AppColors.secondary,
+                    ),
+                    const SizedBox(width: 3),
+                    Text(
+                      '${item.calories.round()} kcal',
                       style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.lightTextPrimary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.secondary,
                       ),
                     ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 6),
+              // Trash/Delete Button
+              InkWell(
+                onTap: onDelete,
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEF2F2),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  GestureDetector(
-                    onTap: _increment,
-                    child: AnimatedScale(
-                      scale: _isTappedPlus ? 0.88 : 1.0,
-                      duration: const Duration(milliseconds: 100),
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryContainer,
-                          borderRadius: AppRadius.smBorder,
-                        ),
-                        child: const Icon(
-                          Icons.add,
-                          size: 16,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
+                  child: const Icon(
+                    Icons.delete_outline_rounded,
+                    size: 18,
+                    color: Color(0xFFEF4444),
                   ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.delete_outline,
-                      size: 20,
-                      color: AppColors.error,
-                    ),
-                    onPressed: widget.onDelete,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                ],
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           // Macro Badges
           Row(
             children: [
               _buildMacroBadge(
                 'Protein',
                 '${item.proteinG.toStringAsFixed(1)}g',
-                AppColors.protein,
+                const Color(0xFF0284C7),
+                const Color(0xFFE0F2FE),
               ),
               const SizedBox(width: 8),
               _buildMacroBadge(
                 'Carbs',
                 '${item.carbsG.toStringAsFixed(1)}g',
-                AppColors.carbs,
+                const Color(0xFFD97706),
+                const Color(0xFFFEF3C7),
               ),
               const SizedBox(width: 8),
               _buildMacroBadge(
                 'Fat',
                 '${item.fatG.toStringAsFixed(1)}g',
-                AppColors.fat,
+                const Color(0xFFE11D48),
+                const Color(0xFFFFE4E6),
               ),
             ],
           ),
@@ -184,19 +148,24 @@ class _DetectedItemCardState extends State<DetectedItemCard> {
     );
   }
 
-  Widget _buildMacroBadge(String label, String value, Color color) {
+  Widget _buildMacroBadge(
+    String label,
+    String value,
+    Color textColor,
+    Color bgColor,
+  ) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: AppRadius.smBorder,
+        color: bgColor,
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
         '$label: $value',
         style: TextStyle(
           fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: color,
+          fontWeight: FontWeight.w800,
+          color: textColor,
         ),
       ),
     );

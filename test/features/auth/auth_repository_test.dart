@@ -71,12 +71,24 @@ class FakeStorageService implements StorageService {
     };
   }
 
+  String? cachedProfile;
+
+  @override
+  Future<bool> saveCachedProfile(String profileJson) async {
+    cachedProfile = profileJson;
+    return true;
+  }
+
+  @override
+  String? getCachedProfile() => cachedProfile;
+
   @override
   Future<bool> clearAll() async {
     savedToken = null;
     savedUserId = null;
     savedEmail = null;
     savedDisplayName = null;
+    cachedProfile = null;
     return true;
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
-import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 
 class AppCard extends StatelessWidget {
@@ -21,30 +20,30 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectivePadding = padding ?? const EdgeInsets.all(AppSpacing.lg);
+    final effectivePadding = padding ?? const EdgeInsets.all(AppSpacing.xl);
     final effectiveBorder =
         borderSide ??
-        const BorderSide(color: AppColors.inputBorder, width: 1.5);
+        const BorderSide(color: AppColors.darkCardBorder, width: 1.0);
 
     return Container(
       decoration: BoxDecoration(
-        color: backgroundColor ?? AppColors.lightSurface,
-        borderRadius: AppRadius.xlBorder,
+        color: backgroundColor ?? AppColors.darkCard,
+        borderRadius: BorderRadius.circular(28),
         border: Border.fromBorderSide(effectiveBorder),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.06),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
+            color: Colors.black.withValues(alpha: 0.4),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: AppRadius.xlBorder,
+        borderRadius: BorderRadius.circular(28),
         child: InkWell(
           onTap: onTap,
-          borderRadius: AppRadius.xlBorder,
+          borderRadius: BorderRadius.circular(28),
           child: Padding(padding: effectivePadding, child: child),
         ),
       ),

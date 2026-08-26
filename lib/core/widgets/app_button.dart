@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
 import '../theme/app_durations.dart';
 
 enum AppButtonVariant { primary, secondary, outline }
@@ -37,23 +36,23 @@ class _AppButtonState extends State<AppButton> {
 
     switch (widget.variant) {
       case AppButtonVariant.primary:
-        backgroundColor = AppColors.primary;
-        foregroundColor = Colors.white;
+        backgroundColor = Colors.white;
+        foregroundColor = const Color(0xFF07080B);
         break;
       case AppButtonVariant.secondary:
-        backgroundColor = AppColors.secondaryLight;
-        foregroundColor = AppColors.secondaryDark;
-        borderSide = const BorderSide(color: AppColors.secondary, width: 1.5);
+        backgroundColor = const Color(0xFF1E2435);
+        foregroundColor = Colors.white;
+        borderSide = const BorderSide(color: Color(0x33FFFFFF), width: 1.2);
         break;
       case AppButtonVariant.outline:
         backgroundColor = Colors.transparent;
-        foregroundColor = AppColors.lightTextPrimary;
-        borderSide = const BorderSide(color: AppColors.inputBorder, width: 1.5);
+        foregroundColor = Colors.white;
+        borderSide = const BorderSide(color: Color(0x33FFFFFF), width: 1.2);
         break;
     }
 
     return AnimatedScale(
-      scale: _isPressed ? 0.97 : 1.0,
+      scale: _isPressed ? 0.96 : 1.0,
       duration: AppDurations.fast,
       curve: Curves.easeOutCubic,
       child: SizedBox(
@@ -67,11 +66,10 @@ class _AppButtonState extends State<AppButton> {
             style: ElevatedButton.styleFrom(
               backgroundColor: backgroundColor,
               foregroundColor: foregroundColor,
-              elevation: widget.variant == AppButtonVariant.primary ? 2 : 0,
-              shadowColor: AppColors.primary.withValues(alpha: 0.25),
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 24),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(30),
                 side: borderSide,
               ),
             ),
@@ -95,8 +93,9 @@ class _AppButtonState extends State<AppButton> {
                       Text(
                         widget.label,
                         style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.5,
                           color: foregroundColor,
                         ),
                       ),

@@ -64,14 +64,13 @@ void main() {
     );
 
     // Initial splash render
-    expect(find.text('AI-Powered Nutrition & Health'), findsOneWidget);
-    expect(find.text('v1.0.0'), findsOneWidget);
+    expect(find.text('AI-POWERED NUTRITION'), findsOneWidget);
 
     // Advance time beyond splash delay (2 seconds)
     await tester.pumpAndSettle(const Duration(seconds: 3));
 
     // Navigates to LoginScreen when unauthenticated
-    expect(find.text('Welcome Back'), findsOneWidget);
+    expect(find.text('WELCOME BACK'), findsOneWidget);
   });
 
   testWidgets('SplashScreen redirects authenticated user to HomeScreen', (

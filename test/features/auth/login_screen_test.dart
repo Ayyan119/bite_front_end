@@ -59,9 +59,9 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.text('Welcome Back'), findsOneWidget);
+    expect(find.text('WELCOME BACK'), findsOneWidget);
     expect(find.byType(TextFormField), findsNWidgets(2));
     expect(find.text('Log In'), findsOneWidget);
-    expect(find.text('⚡ Dev Quick Login'), findsOneWidget);
+    expect(find.text('Sign Up'), findsOneWidget);
   });
 }

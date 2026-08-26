@@ -7,12 +7,14 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../data/models/meal_analysis_response_model.dart';
+import '../../../../core/widgets/bite_fade_slide.dart';
+import '../../../dashboard/presentation/providers/dashboard_provider.dart';
+import '../../../home/presentation/providers/home_tab_provider.dart';
 import '../providers/meal_analysis_notifier.dart';
 import '../providers/meal_providers.dart';
-import '../widgets/add_item_dialog.dart';
 import '../widgets/detected_item_card.dart';
 import '../widgets/macro_summary_bar.dart';
+import '../widgets/meal_success_dialog.dart';
 
 class MealReviewScreen extends ConsumerStatefulWidget {
   const MealReviewScreen({super.key});
@@ -47,30 +49,39 @@ class _MealReviewScreenState extends ConsumerState<MealReviewScreen>
 
   Future<void> _confirmMeal() async {
     final notifier = ref.read(mealAnalysisNotifierProvider.notifier);
+    final stateBefore = ref.read(mealAnalysisNotifierProvider);
     final success = await notifier.confirmMeal();
 
     if (success && mounted) {
       setState(() => _isSuccessAnim = true);
       _pulseController.forward();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Row(
-            children: [
-              Icon(Icons.check_circle, color: Colors.white),
-              SizedBox(width: 8),
-              Text('Meal logged successfully! Dashboard updated.'),
-            ],
-          ),
-          backgroundColor: AppColors.primary,
-        ),
+      await MealSuccessDialog.show(
+        context,
+        totalCalories: stateBefore.totalCalories,
+        mealType: stateBefore.selectedMealType,
+        itemCount: stateBefore.items.length,
+        onViewDashboard: () {
+          if (mounted) {
+            notifier.reset();
+            ref.read(selectedDashboardDateProvider.notifier).state =
+                DateTime.now();
+            final todayStr = formatDateString(DateTime.now());
+            ref.invalidate(dailyDashboardProvider(todayStr));
+            ref.read(homeTabIndexProvider.notifier).state = 0;
+            context.go('/home');
+          }
+        },
+        onCloseToCameraMeal: () {
+          if (mounted) {
+            notifier.reset();
+            final todayStr = formatDateString(DateTime.now());
+            ref.invalidate(dailyDashboardProvider(todayStr));
+            ref.read(homeTabIndexProvider.notifier).state = 1;
+            context.go('/home');
+          }
+        },
       );
-
-      await Future.delayed(const Duration(milliseconds: 800));
-      if (mounted) {
-        notifier.reset();
-        context.go('/dashboard');
-      }
     } else if (mounted) {
       final state = ref.read(mealAnalysisNotifierProvider);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -82,27 +93,29 @@ class _MealReviewScreenState extends ConsumerState<MealReviewScreen>
     }
   }
 
-  Future<void> _openAddItemDialog() async {
-    final newItem = await showDialog<DetectedItemModel>(
-      context: context,
-      builder: (context) => const AddItemDialog(),
-    );
-    if (newItem != null) {
-      ref.read(mealAnalysisNotifierProvider.notifier).addItem(newItem);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(mealAnalysisNotifierProvider);
     final notifier = ref.read(mealAnalysisNotifierProvider.notifier);
+    final hasItems = state.items.isNotEmpty;
     final isCommitting = state.status == MealAnalysisStatus.committing;
+    final canConfirm = hasItems && !isCommitting;
 
     return Scaffold(
+      backgroundColor: AppColors.lightBackground,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
         title: const Text(
-          'Review & Confirm Meal',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          'REVIEW & CONFIRM MEAL',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.2,
+            color: AppColors.lightTextPrimary,
+          ),
         ),
       ),
       body: SafeArea(
@@ -121,43 +134,46 @@ class _MealReviewScreenState extends ConsumerState<MealReviewScreen>
                         if (state.selectedFile != null ||
                             (state.imageUrl != null &&
                                 state.imageUrl!.isNotEmpty)) ...[
-                          Container(
-                            height: 160,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              borderRadius: AppRadius.lgBorder,
-                              border: Border.all(
-                                color: AppColors.primary,
-                                width: 2,
+                          BiteFadeSlide(
+                            delay: Duration.zero,
+                            child: Container(
+                              height: 170,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(
+                                  color: const Color(0xFFE2E8F0),
+                                  width: 1.2,
+                                ),
                               ),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: AppRadius.lgBorder,
-                              child: Hero(
-                                tag: 'meal-image-preview',
-                                child: state.selectedFile != null
-                                    ? (kIsWeb
-                                          ? FutureBuilder<Uint8List>(
-                                              future: state.selectedFile!
-                                                  .readAsBytes(),
-                                              builder: (context, snapshot) {
-                                                if (snapshot.hasData) {
-                                                  return Image.memory(
-                                                    snapshot.data!,
-                                                    fit: BoxFit.cover,
-                                                  );
-                                                }
-                                                return const SizedBox();
-                                              },
-                                            )
-                                          : Image.file(
-                                              File(state.selectedFile!.path),
-                                              fit: BoxFit.cover,
-                                            ))
-                                    : Image.network(
-                                        state.imageUrl!,
-                                        fit: BoxFit.cover,
-                                      ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(24),
+                                child: Hero(
+                                  tag: 'meal-image-preview',
+                                  child: state.selectedFile != null
+                                      ? (kIsWeb
+                                            ? FutureBuilder<Uint8List>(
+                                                future: state.selectedFile!
+                                                    .readAsBytes(),
+                                                builder: (context, snapshot) {
+                                                  if (snapshot.hasData) {
+                                                    return Image.memory(
+                                                      snapshot.data!,
+                                                      fit: BoxFit.cover,
+                                                    );
+                                                  }
+                                                  return const SizedBox();
+                                                },
+                                              )
+                                            : Image.file(
+                                                File(state.selectedFile!.path),
+                                                fit: BoxFit.cover,
+                                              ))
+                                      : Image.network(
+                                          state.imageUrl!,
+                                          fit: BoxFit.cover,
+                                        ),
+                                ),
                               ),
                             ),
                           ),
@@ -165,99 +181,106 @@ class _MealReviewScreenState extends ConsumerState<MealReviewScreen>
                         ],
 
                         // Meal Type & Item Count Badge
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryContainer,
-                                borderRadius: AppRadius.pillBorder,
-                              ),
-                              child: Text(
-                                state.selectedMealType.toUpperCase(),
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primaryDark,
+                        BiteFadeSlide(
+                          delay: const Duration(milliseconds: 80),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.secondary,
+                                  borderRadius: AppRadius.pillBorder,
+                                ),
+                                child: Text(
+                                  state.selectedMealType.toUpperCase(),
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 1.0,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Text(
-                              '${state.items.length} Food Item(s) Detected',
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.lightTextMuted,
+                              Text(
+                                '${state.items.length} Food Item(s) Detected',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF64748B),
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                         const SizedBox(height: AppSpacing.md),
 
                         // Animated Macro Summary Bar
-                        MacroSummaryBar(
-                          calories: state.totalCalories,
-                          proteinG: state.totalProtein,
-                          carbsG: state.totalCarbs,
-                          fatG: state.totalFat,
+                        BiteFadeSlide(
+                          delay: const Duration(milliseconds: 160),
+                          child: MacroSummaryBar(
+                            calories: state.totalCalories,
+                            proteinG: state.totalProtein,
+                            carbsG: state.totalCarbs,
+                            fatG: state.totalFat,
+                          ),
                         ),
                         const SizedBox(height: AppSpacing.lg),
 
-                        // Detected Items Section Title & Add Button
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Detected Food Items',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.lightTextPrimary,
+                        // Detected Items Section Title & List
+                        BiteFadeSlide(
+                          delay: const Duration(milliseconds: 240),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'DETECTED FOOD ITEMS',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1.2,
+                                  color: Color(0xFF0F172A),
+                                ),
                               ),
-                            ),
-                            TextButton.icon(
-                              onPressed: _openAddItemDialog,
-                              icon: const Icon(Icons.add, size: 18),
-                              label: const Text('Add Item'),
-                              style: TextButton.styleFrom(
-                                foregroundColor: AppColors.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
+                              const SizedBox(height: 10),
 
-                        // List of Detected Items
-                        if (state.items.isEmpty)
-                          Container(
-                            padding: const EdgeInsets.all(24),
-                            alignment: Alignment.center,
-                            child: const Text(
-                              'No food items in meal list. Tap "Add Item" to add manually.',
-                              style: TextStyle(color: AppColors.lightTextMuted),
-                            ),
-                          )
-                        else
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: state.items.length,
-                            itemBuilder: (context, index) {
-                              final item = state.items[index];
-                              return DetectedItemCard(
-                                key: ValueKey('${item.foodName}_$index'),
-                                item: item,
-                                onPortionChanged: (newAmount) {
-                                  notifier.updateItemPortion(index, newAmount);
-                                },
-                                onDelete: () => notifier.removeItem(index),
-                              );
-                            },
+                              // List of Detected Items
+                              if (state.items.isEmpty)
+                                Container(
+                                  padding: const EdgeInsets.all(24),
+                                  alignment: Alignment.center,
+                                  child: const Text(
+                                    'No food items detected in meal photo.',
+                                    style: TextStyle(color: Color(0xFF64748B)),
+                                  ),
+                                )
+                              else
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: state.items.length,
+                                  itemBuilder: (context, index) {
+                                    final item = state.items[index];
+                                    return DetectedItemCard(
+                                      key: ValueKey('${item.foodName}_$index'),
+                                      item: item,
+                                      onPortionChanged: (newAmount) {
+                                        notifier.updateItemPortion(
+                                          index,
+                                          newAmount,
+                                        );
+                                      },
+                                      onDelete: () =>
+                                          notifier.removeItem(index),
+                                    );
+                                  },
+                                ),
+                            ],
                           ),
+                        ),
                       ],
                     ),
                   ),
@@ -266,67 +289,102 @@ class _MealReviewScreenState extends ConsumerState<MealReviewScreen>
             ),
 
             // Sticky Bottom Confirmation Action Bar
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                border: const Border(
-                  top: BorderSide(color: AppColors.borderLight),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -4),
+            BiteFadeSlide(
+              delay: const Duration(milliseconds: 320),
+              child: Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  border: Border(
+                    top: BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
                   ),
-                ],
-              ),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 600),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton.icon(
-                      onPressed: isCommitting ? null : _confirmMeal,
-                      icon: isCommitting
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: Colors.white,
-                              ),
-                            )
-                          : (_isSuccessAnim
-                                ? ScaleTransition(
-                                    scale: _scaleAnimation,
-                                    child: const Icon(
-                                      Icons.check_circle,
-                                      size: 24,
-                                    ),
-                                  )
-                                : const Icon(Icons.check, size: 22)),
-                      label: Text(
-                        isCommitting
-                            ? 'Saving Meal Log...'
-                            : (_isSuccessAnim
-                                  ? 'Meal Logged!'
-                                  : 'Confirm & Log Meal'),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 600),
+                    child: Container(
+                      width: double.infinity,
+                      height: 54,
+                      decoration: BoxDecoration(
+                        gradient: canConfirm
+                            ? const LinearGradient(
+                                colors: [
+                                  AppColors.secondary,
+                                  Color(0xFFFF7700),
+                                ],
+                              )
+                            : null,
+                        color: canConfirm ? null : const Color(0xFFE2E8F0),
+                        borderRadius: AppRadius.pillBorder,
+                        boxShadow: canConfirm
+                            ? [
+                                BoxShadow(
+                                  color: AppColors.secondary.withValues(
+                                    alpha: 0.38,
+                                  ),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ]
+                            : [],
                       ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _isSuccessAnim
-                            ? AppColors.success
-                            : AppColors.primary,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: AppRadius.lgBorder,
+                      child: ElevatedButton.icon(
+                        onPressed: canConfirm ? _confirmMeal : null,
+                        icon: isCommitting
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : (_isSuccessAnim
+                                  ? ScaleTransition(
+                                      scale: _scaleAnimation,
+                                      child: const Icon(
+                                        Icons.check_circle,
+                                        size: 24,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : Icon(
+                                      hasItems
+                                          ? Icons.check_rounded
+                                          : Icons.block_rounded,
+                                      size: 22,
+                                      color: canConfirm
+                                          ? Colors.white
+                                          : const Color(0xFF94A3B8),
+                                    )),
+                        label: Text(
+                          isCommitting
+                              ? 'SAVING MEAL LOG...'
+                              : (_isSuccessAnim
+                                    ? 'MEAL LOGGED!'
+                                    : (hasItems
+                                          ? 'CONFIRM & LOG MEAL'
+                                          : 'NO FOOD ITEMS DETECTED')),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.8,
+                            color: canConfirm
+                                ? Colors.white
+                                : const Color(0xFF94A3B8),
+                          ),
                         ),
-                        elevation: 2,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          foregroundColor: canConfirm
+                              ? Colors.white
+                              : const Color(0xFF94A3B8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: AppRadius.pillBorder,
+                          ),
+                          elevation: 0,
+                        ),
                       ),
                     ),
                   ),

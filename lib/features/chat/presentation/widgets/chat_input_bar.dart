@@ -1,15 +1,17 @@
+import 'dart:ui';
 import 'package:bite_front_end/core/theme/app_colors.dart';
-import 'package:bite_front_end/core/theme/app_radius.dart';
 import 'package:flutter/material.dart';
 
 class ChatInputBar extends StatefulWidget {
   final ValueChanged<String> onSend;
   final bool isStreaming;
+  final double bottomInset;
 
   const ChatInputBar({
     super.key,
     required this.onSend,
     required this.isStreaming,
+    this.bottomInset = 0.0,
   });
 
   @override
@@ -18,6 +20,7 @@ class ChatInputBar extends StatefulWidget {
 
 class _ChatInputBarState extends State<ChatInputBar> {
   final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
   bool _hasText = false;
 
   @override
@@ -36,6 +39,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -44,104 +48,151 @@ class _ChatInputBarState extends State<ChatInputBar> {
     if (text.isEmpty || widget.isStreaming) return;
     widget.onSend(text);
     _controller.clear();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _focusNode.requestFocus();
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      margin: EdgeInsets.only(
+        left: 12.0,
+        right: 12.0,
+        bottom: widget.bottomInset + 8.0,
       ),
       child: SafeArea(
-        child: Row(
-          children: [
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? AppColors.darkBackground
-                      : AppColors.inputFill,
-                  borderRadius: AppRadius.pillBorder,
-                  border: Border.all(
-                    color: isDark
-                        ? AppColors.borderDark
-                        : AppColors.inputBorder,
-                  ),
-                ),
-                child: TextField(
-                  controller: _controller,
-                  enabled: !widget.isStreaming,
-                  textInputAction: TextInputAction.send,
-                  onSubmitted: (_) => _handleSubmitted(),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: isDark
-                        ? AppColors.darkTextPrimary
-                        : AppColors.lightTextPrimary,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: widget.isStreaming
-                        ? 'AI assistant is responding...'
-                        : 'Ask nutrition advice or log a meal...',
-                    hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                      color: isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.lightTextMuted,
-                    ),
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
-                  ),
-                ),
+        top: false,
+        bottom: widget.bottomInset == 0,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(32.0),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 16.0, sigmaY: 16.0),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14.0,
+                vertical: 8.0,
               ),
-            ),
-            const SizedBox(width: 10),
-            Material(
-              color: (_hasText && !widget.isStreaming)
-                  ? AppColors.primary
-                  : (isDark ? AppColors.borderDark : AppColors.borderLight),
-              shape: const CircleBorder(),
-              elevation: (_hasText && !widget.isStreaming) ? 2 : 0,
-              child: InkWell(
-                onTap: (_hasText && !widget.isStreaming)
-                    ? _handleSubmitted
-                    : null,
-                customBorder: const CircleBorder(),
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: widget.isStreaming
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
-                            ),
-                          ),
-                        )
-                      : Icon(
-                          Icons.send_rounded,
-                          size: 20,
-                          color: _hasText
-                              ? Colors.white
-                              : AppColors.lightTextMuted,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.84),
+                borderRadius: BorderRadius.circular(32.0),
+                border: Border.all(
+                  color: const Color(0xFFE2E8F0).withValues(alpha: 0.9),
+                  width: 1.2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 12.0, right: 6.0),
+                      child: TextField(
+                        controller: _controller,
+                        focusNode: _focusNode,
+                        enabled: true,
+                        readOnly: widget.isStreaming,
+                        textInputAction: TextInputAction.send,
+                        onSubmitted: (_) => _handleSubmitted(),
+                        style: const TextStyle(
+                          color: Color(0xFF0F172A),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                         ),
-                ),
+                        decoration: InputDecoration(
+                          hintText: widget.isStreaming
+                              ? 'AI assistant is typing...'
+                              : 'Ask nutrition advice or log a meal...',
+                          hintStyle: const TextStyle(
+                            color: Color(0xFF94A3B8),
+                            fontSize: 13,
+                          ),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 10.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: (_hasText && !widget.isStreaming)
+                          ? _handleSubmitted
+                          : null,
+                      customBorder: const CircleBorder(),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: (_hasText && !widget.isStreaming)
+                              ? const LinearGradient(
+                                  colors: [
+                                    AppColors.secondary,
+                                    Color(0xFFFF7700),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                )
+                              : null,
+                          color: (_hasText && !widget.isStreaming)
+                              ? null
+                              : const Color(0xFFE2E8F0),
+                          boxShadow: (_hasText && !widget.isStreaming)
+                              ? [
+                                  BoxShadow(
+                                    color: AppColors.secondary.withValues(
+                                      alpha: 0.4,
+                                    ),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ]
+                              : [],
+                        ),
+                        child: Center(
+                          child: widget.isStreaming
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      AppColors.secondary,
+                                    ),
+                                  ),
+                                )
+                              : Icon(
+                                  Icons.arrow_upward_rounded,
+                                  size: 22,
+                                  color: _hasText
+                                      ? Colors.white
+                                      : const Color(0xFF94A3B8),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

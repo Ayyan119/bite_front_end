@@ -86,15 +86,8 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       final response = await _dio.get(
         ApiConstants.chatSessionMessages(sessionId),
       );
-      if (response.data is List) {
-        return (response.data as List)
-            .map(
-              (e) =>
-                  ChatMessageResponseModel.fromJson(e as Map<String, dynamic>),
-            )
-            .toList();
-      }
-      return [];
+
+      return ChatMessageResponseModel.parseList(response.data);
     } on DioException catch (e) {
       throw ServerException(
         _extractErrorMessage(e) ?? 'Failed to load session messages',

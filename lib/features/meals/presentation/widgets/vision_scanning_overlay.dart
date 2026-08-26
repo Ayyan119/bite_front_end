@@ -47,47 +47,8 @@ class _VisionScanningOverlayState extends State<VisionScanningOverlay>
         builder: (context, child) {
           return CustomPaint(
             painter: _ScannerPainter(progress: _scanAnimation.value),
-            child: child,
           );
         },
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.75),
-              borderRadius: BorderRadius.circular(30),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.4),
-                  blurRadius: 16,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: AppColors.primaryLight,
-                  ),
-                ),
-                SizedBox(width: 12),
-                Text(
-                  'AI Vision Analyzing Food...',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -102,17 +63,18 @@ class _ScannerPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final scanY = size.height * progress;
 
-    // Laser scanning line
+    // Flame orange laser scanning line
     final linePaint = Paint()
       ..shader = LinearGradient(
         colors: [
-          AppColors.primary.withValues(alpha: 0.0),
-          AppColors.primaryLight,
-          AppColors.primary.withValues(alpha: 0.0),
+          AppColors.secondary.withValues(alpha: 0.0),
+          AppColors.secondary,
+          const Color(0xFFFF7700),
+          AppColors.secondary.withValues(alpha: 0.0),
         ],
-        stops: const [0.0, 0.5, 1.0],
-      ).createShader(Rect.fromLTWH(0, scanY, size.width, 3))
-      ..strokeWidth = 3.0
+        stops: const [0.0, 0.35, 0.65, 1.0],
+      ).createShader(Rect.fromLTWH(0, scanY, size.width, 3.5))
+      ..strokeWidth = 3.5
       ..style = PaintingStyle.stroke;
 
     canvas.drawLine(Offset(0, scanY), Offset(size.width, scanY), linePaint);
@@ -123,12 +85,12 @@ class _ScannerPainter extends CustomPainter {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          AppColors.primary.withValues(alpha: 0.35),
-          AppColors.primary.withValues(alpha: 0.0),
+          AppColors.secondary.withValues(alpha: 0.40),
+          AppColors.secondary.withValues(alpha: 0.0),
         ],
-      ).createShader(Rect.fromLTWH(0, scanY - 30, size.width, 35));
+      ).createShader(Rect.fromLTWH(0, scanY - 40, size.width, 45));
 
-    canvas.drawRect(Rect.fromLTWH(0, scanY - 30, size.width, 35), beamPaint);
+    canvas.drawRect(Rect.fromLTWH(0, scanY - 40, size.width, 45), beamPaint);
   }
 
   @override

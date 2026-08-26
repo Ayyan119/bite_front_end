@@ -1,11 +1,11 @@
+import 'package:bite_front_end/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
 
 class RegisterStepBody extends StatelessWidget {
   final TextEditingController ageController;
   final TextEditingController heightController;
   final TextEditingController weightController;
-  final String gender;
+  final String? gender;
   final ValueChanged<String> onGenderChanged;
 
   const RegisterStepBody({
@@ -25,63 +25,72 @@ class RegisterStepBody extends StatelessWidget {
         const Text(
           'Physical Profile',
           style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-            color: AppColors.lightTextPrimary,
+            fontSize: 20,
+            fontWeight: FontWeight.w900,
+            color: Color(0xFF0F172A),
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
         const Text(
-          'Used to accurately calculate your BMR, TDEE, and daily macro targets.',
+          'Used to calculate your BMR, TDEE, and daily macro targets. (Optional)',
           style: TextStyle(
-            fontSize: 14,
-            color: AppColors.lightTextSecondary,
-            height: 1.3,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF64748B),
+            height: 1.35,
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 22),
+
+        // Age Field (Empty by default)
         TextFormField(
           controller: ageController,
           keyboardType: TextInputType.number,
           style: const TextStyle(
-            color: AppColors.lightTextPrimary,
-            fontWeight: FontWeight.w600,
+            color: Color(0xFF0F172A),
+            fontWeight: FontWeight.w700,
+            fontSize: 14,
           ),
           decoration: InputDecoration(
             labelText: 'Age (years)',
             labelStyle: const TextStyle(
-              color: AppColors.lightTextSecondary,
-              fontWeight: FontWeight.bold,
+              color: Color(0xFF64748B),
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
             ),
-            hintText: '25',
+            hintText: 'e.g. 25',
             prefixIcon: const Icon(
               Icons.cake_outlined,
-              color: AppColors.primary,
+              color: AppColors.secondary,
+              size: 20,
             ),
             filled: true,
-            fillColor: AppColors.inputFill,
+            fillColor: const Color(0xFFF8FAFC),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: const BorderSide(
-                color: AppColors.inputBorder,
-                width: 1.5,
+                color: Color(0xFFE2E8F0),
+                width: 1.2,
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: const BorderSide(
-                color: AppColors.inputBorder,
-                width: 1.5,
+                color: Color(0xFFE2E8F0),
+                width: 1.2,
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+              borderSide: const BorderSide(
+                color: AppColors.secondary,
+                width: 2,
+              ),
             ),
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return 'Please enter your age';
+              return null; // Optional if skipped
             }
             final ageNum = int.tryParse(value);
             if (ageNum == null || ageNum <= 0 || ageNum > 120) {
@@ -91,12 +100,13 @@ class RegisterStepBody extends StatelessWidget {
           },
         ),
         const SizedBox(height: 18),
+
         const Text(
-          'Gender',
+          'Gender (Optional)',
           style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: AppColors.lightTextPrimary,
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF0F172A),
           ),
         ),
         const SizedBox(height: 8),
@@ -125,6 +135,8 @@ class RegisterStepBody extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 18),
+
+        // Height & Weight Side by Side (Empty by default)
         Row(
           children: [
             Expanded(
@@ -134,47 +146,50 @@ class RegisterStepBody extends StatelessWidget {
                   decimal: true,
                 ),
                 style: const TextStyle(
-                  color: AppColors.lightTextPrimary,
-                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF0F172A),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
                 ),
                 decoration: InputDecoration(
                   labelText: 'Height (cm)',
                   labelStyle: const TextStyle(
-                    color: AppColors.lightTextSecondary,
-                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF64748B),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
                   ),
-                  hintText: '175.0',
+                  hintText: 'e.g. 175.0',
                   prefixIcon: const Icon(
-                    Icons.height,
-                    color: AppColors.primary,
+                    Icons.straighten_rounded,
+                    color: AppColors.secondary,
+                    size: 20,
                   ),
                   filled: true,
-                  fillColor: AppColors.inputFill,
+                  fillColor: const Color(0xFFF8FAFC),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: const BorderSide(
-                      color: AppColors.inputBorder,
-                      width: 1.5,
+                      color: Color(0xFFE2E8F0),
+                      width: 1.2,
                     ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: const BorderSide(
-                      color: AppColors.inputBorder,
-                      width: 1.5,
+                      color: Color(0xFFE2E8F0),
+                      width: 1.2,
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: const BorderSide(
-                      color: AppColors.primary,
+                      color: AppColors.secondary,
                       width: 2,
                     ),
                   ),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Required';
+                    return null; // Optional if skipped
                   }
                   final h = double.tryParse(value);
                   if (h == null || h <= 0 || h > 300) {
@@ -192,47 +207,50 @@ class RegisterStepBody extends StatelessWidget {
                   decimal: true,
                 ),
                 style: const TextStyle(
-                  color: AppColors.lightTextPrimary,
-                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF0F172A),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
                 ),
                 decoration: InputDecoration(
                   labelText: 'Weight (kg)',
                   labelStyle: const TextStyle(
-                    color: AppColors.lightTextSecondary,
-                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF64748B),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
                   ),
-                  hintText: '70.0',
+                  hintText: 'e.g. 70.0',
                   prefixIcon: const Icon(
                     Icons.monitor_weight_outlined,
-                    color: AppColors.primary,
+                    color: AppColors.secondary,
+                    size: 20,
                   ),
                   filled: true,
-                  fillColor: AppColors.inputFill,
+                  fillColor: const Color(0xFFF8FAFC),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: const BorderSide(
-                      color: AppColors.inputBorder,
-                      width: 1.5,
+                      color: Color(0xFFE2E8F0),
+                      width: 1.2,
                     ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: const BorderSide(
-                      color: AppColors.inputBorder,
-                      width: 1.5,
+                      color: Color(0xFFE2E8F0),
+                      width: 1.2,
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: const BorderSide(
-                      color: AppColors.primary,
+                      color: AppColors.secondary,
                       width: 2,
                     ),
                   ),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Required';
+                    return null; // Optional if skipped
                   }
                   final w = double.tryParse(value);
                   if (w == null || w <= 0 || w > 500) {
@@ -252,7 +270,7 @@ class RegisterStepBody extends StatelessWidget {
 class _GenderChip extends StatelessWidget {
   final String label;
   final String value;
-  final String selectedGroup;
+  final String? selectedGroup;
   final ValueChanged<String> onSelected;
 
   const _GenderChip({
@@ -270,21 +288,20 @@ class _GenderChip extends StatelessWidget {
       label: Text(
         label,
         style: TextStyle(
-          color: isSelected
-              ? AppColors.primaryDark
-              : AppColors.lightTextPrimary,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+          color: isSelected ? AppColors.secondary : const Color(0xFF0F172A),
+          fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+          fontSize: 13,
         ),
       ),
       selected: isSelected,
       onSelected: (_) => onSelected(value),
-      selectedColor: AppColors.primaryContainer,
-      backgroundColor: AppColors.inputFill,
+      selectedColor: const Color(0xFFFFF7ED),
+      backgroundColor: const Color(0xFFF8FAFC),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
         side: BorderSide(
-          color: isSelected ? AppColors.primary : AppColors.inputBorder,
-          width: isSelected ? 2 : 1.5,
+          color: isSelected ? AppColors.secondary : const Color(0xFFE2E8F0),
+          width: isSelected ? 2 : 1.2,
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),

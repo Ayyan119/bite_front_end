@@ -68,7 +68,7 @@ void main() {
       );
 
       // Initial splash rendering
-      expect(find.text('AI-Powered Nutrition & Health'), findsOneWidget);
+      expect(find.text('AI-POWERED NUTRITION'), findsOneWidget);
 
       // Advance splash screen timer (2s)
       await tester.pumpAndSettle(const Duration(seconds: 3));

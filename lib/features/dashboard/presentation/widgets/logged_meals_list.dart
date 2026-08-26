@@ -10,38 +10,107 @@ class LoggedMealsList extends StatelessWidget {
 
   const LoggedMealsList({super.key, required this.meals});
 
-  IconData _getMealIcon(String type) {
-    switch (type.toLowerCase()) {
-      case 'breakfast':
-        return Icons.free_breakfast_outlined;
-      case 'lunch':
-        return Icons.lunch_dining_outlined;
-      case 'dinner':
-        return Icons.dinner_dining_outlined;
-      case 'snack':
-      default:
-        return Icons.local_pizza_outlined;
+  String _getMealCategoryImagePath(String type, String? caption) {
+    final t = type.toLowerCase();
+    final c = (caption ?? '').toLowerCase();
+
+    if (t == 'breakfast' ||
+        c.contains('breakfast') ||
+        c.contains('egg') ||
+        c.contains('pancake') ||
+        c.contains('toast') ||
+        c.contains('cereal')) {
+      return 'assets/images/breakfast_category.jpg';
     }
+    if (t == 'lunch' ||
+        c.contains('lunch') ||
+        c.contains('salad') ||
+        c.contains('sandwich') ||
+        c.contains('biryani') ||
+        c.contains('rice')) {
+      return 'assets/images/lunch_category.jpg';
+    }
+    if (t == 'dinner' ||
+        c.contains('dinner') ||
+        c.contains('steak') ||
+        c.contains('curry') ||
+        c.contains('pasta') ||
+        c.contains('pizza')) {
+      return 'assets/images/dinner_category.jpg';
+    }
+    if (t == 'drink' ||
+        t == 'beverage' ||
+        c.contains('drink') ||
+        c.contains('beverage') ||
+        c.contains('smoothie') ||
+        c.contains('juice') ||
+        c.contains('water') ||
+        c.contains('glass') ||
+        c.contains('coffee') ||
+        c.contains('tea')) {
+      return 'assets/images/drink_category.jpg';
+    }
+    return 'assets/images/snack_category.jpg';
   }
 
-  Color _getMealColor(String type) {
-    switch (type.toLowerCase()) {
-      case 'breakfast':
-        return AppColors.carbs;
-      case 'lunch':
-        return AppColors.primary;
-      case 'dinner':
-        return AppColors.tertiary;
-      case 'snack':
-      default:
-        return AppColors.secondary;
+  String _getMealCategoryLabel(String type, String? caption) {
+    final path = _getMealCategoryImagePath(type, caption);
+    if (path.contains('breakfast')) return '🥞 Breakfast';
+    if (path.contains('lunch')) return '🥗 Lunch';
+    if (path.contains('dinner')) return '🍲 Dinner';
+    if (path.contains('drink')) return '🍹 Drink';
+    return '🍿 Snack';
+  }
+
+  String _cleanMealTitle(String? userCaption, String mealType) {
+    if (userCaption == null || userCaption.trim().isEmpty) {
+      return mealType[0].toUpperCase() + mealType.substring(1);
     }
+
+    var text = userCaption.trim();
+    // Strip out "(Uploaded at ...)", "(Upload...)", "(Uploaded ...)", timestamp strings
+    text = text.replaceAll(
+      RegExp(
+        r'\s*\([^)]*(?:upload|at|\d{4}-\d{2})[^)]*\)',
+        caseSensitive: false,
+      ),
+      '',
+    );
+    text = text.replaceAll(
+      RegExp(r'\s*\(?\s*uploaded?\s*at\s*[^)]*\)?', caseSensitive: false),
+      '',
+    );
+    text = text.replaceAll(
+      RegExp(r'\s*\(?\s*upload[^\)]*\)?', caseSensitive: false),
+      '',
+    );
+    text = text.replaceAll(
+      RegExp(r'\s*\d{4}-\d{2}-\d{2}.*$', caseSensitive: false),
+      '',
+    );
+    text = text.trim();
+
+    if (text.isEmpty) {
+      return mealType[0].toUpperCase() + mealType.substring(1);
+    }
+    return text;
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final cardBg = isDark ? AppColors.darkCard : Colors.white;
+    final cardBorder = isDark
+        ? const BorderSide(color: Color(0xFF262D3E), width: 1.0)
+        : const BorderSide(color: Color(0xFFE2E8F0), width: 1.0);
+    final primaryTextColor = isDark ? Colors.white : AppColors.lightTextPrimary;
+
     if (meals.isEmpty) {
       return AppCard(
+        backgroundColor: cardBg,
+        borderSide: cardBorder,
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.xl,
           vertical: AppSpacing.xxl,
@@ -50,8 +119,10 @@ class LoggedMealsList extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              decoration: const BoxDecoration(
-                color: AppColors.primaryContainer,
+              decoration: BoxDecoration(
+                color: isDark
+                    ? AppColors.primaryContainer
+                    : AppColors.pastelMint,
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -61,21 +132,23 @@ class LoggedMealsList extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            const Text(
+            Text(
               'No Meals Logged Yet',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: AppColors.lightTextPrimary,
+                color: primaryTextColor,
               ),
             ),
             const SizedBox(height: AppSpacing.xs),
-            const Text(
+            Text(
               'Snap a picture of your food or use AI Chat to log your first meal of the day.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
-                color: AppColors.lightTextSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.lightTextSecondary,
               ),
             ),
           ],
@@ -89,12 +162,12 @@ class LoggedMealsList extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               "Today's Logged Meals",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
-                color: AppColors.lightTextPrimary,
+                color: primaryTextColor,
               ),
             ),
             Container(
@@ -103,7 +176,9 @@ class LoggedMealsList extends StatelessWidget {
                 vertical: AppSpacing.xs,
               ),
               decoration: BoxDecoration(
-                color: AppColors.primaryContainer,
+                color: isDark
+                    ? AppColors.primaryContainer
+                    : AppColors.pastelMint,
                 borderRadius: AppRadius.pillBorder,
               ),
               child: Text(
@@ -126,38 +201,74 @@ class LoggedMealsList extends StatelessWidget {
               const SizedBox(height: AppSpacing.sm),
           itemBuilder: (context, index) {
             final meal = meals[index];
-            final icon = _getMealIcon(meal.mealType);
-            final color = _getMealColor(meal.mealType);
+            final imagePath = _getMealCategoryImagePath(
+              meal.mealType,
+              meal.userCaption,
+            );
+            final categoryLabel = _getMealCategoryLabel(
+              meal.mealType,
+              meal.userCaption,
+            );
 
             return AppCard(
+              backgroundColor: cardBg,
+              borderSide: cardBorder,
               padding: const EdgeInsets.all(AppSpacing.md),
               child: Row(
                 children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.12),
-                      borderRadius: AppRadius.mdBorder,
+                  // Category Artwork Illustration Image
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: Image.asset(
+                      imagePath,
+                      width: 56,
+                      height: 56,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: 56,
+                          height: 56,
+                          color: isDark
+                              ? AppColors.primaryContainer
+                              : AppColors.pastelMint,
+                          child: const Icon(
+                            Icons.restaurant_rounded,
+                            color: AppColors.primary,
+                          ),
+                        );
+                      },
                     ),
-                    child: Icon(icon, color: color, size: 24),
                   ),
                   const SizedBox(width: AppSpacing.md),
+
+                  // Meal Info & Macro Pills
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Category Tag
                         Text(
-                          meal.userCaption ?? meal.mealType.toUpperCase(),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          categoryLabel,
                           style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.lightTextPrimary,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primaryDark,
                           ),
                         ),
                         const SizedBox(height: 2),
+                        // Meal Title
+                        Text(
+                          _cleanMealTitle(meal.userCaption, meal.mealType),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: primaryTextColor,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        // Macro Pills
                         Row(
                           children: [
                             _MacroPill(
@@ -179,23 +290,18 @@ class LoggedMealsList extends StatelessWidget {
                       ],
                     ),
                   ),
+
+                  // Total Calories (Meal timestamp removed per request!)
                   Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
                         '${meal.calories.toInt()} kcal',
                         style: const TextStyle(
-                          fontSize: 15,
+                          fontSize: 16,
                           fontWeight: FontWeight.w900,
                           color: AppColors.calories,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        meal.loggedAt.split('T').first,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: AppColors.lightTextMuted,
                         ),
                       ),
                     ],

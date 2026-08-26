@@ -1,4 +1,5 @@
 import 'package:bite_front_end/core/theme/app_colors.dart';
+import 'package:bite_front_end/core/widgets/bite_fade_slide.dart';
 import 'package:bite_front_end/features/chat/data/models/chat_message_response_model.dart';
 import 'package:bite_front_end/features/chat/presentation/providers/active_chat_provider.dart';
 import 'package:bite_front_end/features/chat/presentation/widgets/chat_bubble.dart';
@@ -52,22 +53,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       }
     });
 
-    return Scaffold(
-      drawer: const ChatSessionsDrawer(),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final isWideScreen = constraints.maxWidth >= 768;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWideScreen = constraints.maxWidth >= 768;
 
-          if (isWideScreen) {
-            return Row(
+        if (isWideScreen) {
+          return Scaffold(
+            backgroundColor: AppColors.lightBackground,
+            body: Row(
               children: [
                 const SizedBox(width: 280, child: ChatSessionsDrawer()),
-                VerticalDivider(
+                const VerticalDivider(
                   width: 1,
                   thickness: 1,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? AppColors.borderDark
-                      : AppColors.borderLight,
+                  color: Color(0xFFE2E8F0),
                 ),
                 Expanded(
                   child: _buildChatContent(
@@ -78,17 +77,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   ),
                 ),
               ],
-            );
-          }
-
-          return _buildChatContent(
-            context: context,
-            activeChatState: activeChatState,
-            isStreaming: isStreaming,
-            showDrawerButton: true,
+            ),
           );
-        },
-      ),
+        }
+
+        return _buildChatContent(
+          context: context,
+          activeChatState: activeChatState,
+          isStreaming: isStreaming,
+          showDrawerButton: true,
+        );
+      },
     );
   }
 
@@ -98,205 +97,366 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     required bool isStreaming,
     required bool showDrawerButton,
   }) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     final allMessages = [...activeChatState.messages];
+    final isMobile = MediaQuery.of(context).size.width < 600;
+    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+    final bottomInset = isKeyboardOpen ? 0.0 : (isMobile ? 86.0 : 0.0);
+    final hasStreamingResponse =
+        activeChatState.currentStreamingResponse.isNotEmpty;
+    final hasStatusMessage =
+        activeChatState.statusMessage != null &&
+        activeChatState.statusMessage!.isNotEmpty;
+    final extraItemCount = hasStreamingResponse
+        ? 1
+        : (hasStatusMessage ? 1 : 0);
 
     return Scaffold(
+      backgroundColor: AppColors.lightBackground,
+      drawer: showDrawerButton ? const ChatSessionsDrawer() : null,
       appBar: AppBar(
-        title: Row(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: const Row(
           children: [
-            const Icon(
+            Icon(
               Icons.auto_awesome_rounded,
-              color: AppColors.primary,
+              color: AppColors.secondary,
               size: 20,
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Text(
               'AI Nutrition Assistant',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF0F172A),
               ),
             ),
           ],
         ),
         leading: showDrawerButton
             ? Builder(
-                builder: (context) => IconButton(
-                  icon: const Icon(Icons.menu_rounded),
-                  onPressed: () => Scaffold.of(context).openDrawer(),
-                ),
-              )
-            : null,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add_comment_rounded),
-            tooltip: 'New Chat',
-            onPressed: () {
-              ref.read(activeChatNotifierProvider.notifier).startNewSession();
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          if (activeChatState.errorMessage != null)
-            Container(
-              width: double.infinity,
-              color: AppColors.errorContainer,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.error_outline,
-                    color: AppColors.error,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      activeChatState.errorMessage!,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.error,
-                        fontWeight: FontWeight.w600,
+                builder: (context) => Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => Scaffold.of(context).openDrawer(),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF7ED),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppColors.secondary.withValues(alpha: 0.35),
+                            width: 1.2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.secondary.withValues(
+                                alpha: 0.15,
+                              ),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            Icons.history_rounded,
+                            color: AppColors.secondary,
+                            size: 20,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ],
+                ),
+              )
+            : null,
+      ),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Column(
+              children: [
+                if (activeChatState.errorMessage != null)
+                  Container(
+                    width: double.infinity,
+                    color: const Color(0xFFFEF2F2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          color: AppColors.error,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            activeChatState.errorMessage!,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.error,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                Expanded(
+                  child:
+                      allMessages.isEmpty &&
+                          !hasStreamingResponse &&
+                          !hasStatusMessage
+                      ? BiteFadeSlide(child: _buildEmptyState(context))
+                      : NotificationListener<ScrollNotification>(
+                          onNotification: (scrollNotification) {
+                            if (scrollNotification is ScrollStartNotification) {
+                              FocusScope.of(context).unfocus();
+                            }
+                            return false;
+                          },
+                          child: ListView.builder(
+                            controller: _scrollController,
+                            keyboardDismissBehavior:
+                                ScrollViewKeyboardDismissBehavior.onDrag,
+                            padding: EdgeInsets.only(
+                              top: 12.0,
+                              bottom: isMobile
+                                  ? (isKeyboardOpen ? 120.0 : 210.0)
+                                  : 140.0,
+                            ),
+                            itemCount: allMessages.length + extraItemCount,
+                            itemBuilder: (context, index) {
+                              if (index < allMessages.length) {
+                                return ChatBubble(message: allMessages[index]);
+                              }
+
+                              if (hasStreamingResponse) {
+                                final streamingMsg = ChatMessageResponseModel(
+                                  id: 'streaming_temp',
+                                  sessionId:
+                                      activeChatState.activeSessionId ?? '',
+                                  role: 'assistant',
+                                  content:
+                                      activeChatState.currentStreamingResponse,
+                                  createdAt: DateTime.now().toIso8601String(),
+                                );
+
+                                return ChatBubble(
+                                  message: streamingMsg,
+                                  isStreaming: true,
+                                );
+                              } else {
+                                return SseStatusBanner(
+                                  statusMessage: activeChatState.statusMessage!,
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                ),
+              ],
+            ),
+          ),
+
+          // Enhanced Floating Action Button for New Chat (positioned bottom-right above input box)
+          Positioned(
+            right: 20,
+            bottom: bottomInset + (isMobile ? 82.0 : 76.0),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              child: Material(
+                color: Colors.transparent,
+                child: Tooltip(
+                  message: 'New Chat',
+                  child: InkWell(
+                    onTap: () {
+                      ref
+                          .read(activeChatNotifierProvider.notifier)
+                          .startNewSession();
+                    },
+                    customBorder: const CircleBorder(),
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const LinearGradient(
+                          colors: [AppColors.secondary, Color(0xFFFF7700)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        border: Border.all(color: Colors.white, width: 2.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.secondary.withValues(alpha: 0.45),
+                            blurRadius: 14,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.add_comment_rounded,
+                          size: 22,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
-          Expanded(
-            child:
-                allMessages.isEmpty &&
-                    activeChatState.currentStreamingResponse.isEmpty &&
-                    activeChatState.statusMessage == null
-                ? _buildEmptyState(context, isDark)
-                : ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.symmetric(vertical: 12.0),
-                    itemCount:
-                        allMessages.length +
-                        (activeChatState.currentStreamingResponse.isNotEmpty
-                            ? 1
-                            : 0),
-                    itemBuilder: (context, index) {
-                      if (index < allMessages.length) {
-                        return ChatBubble(message: allMessages[index]);
-                      }
-
-                      // Active streaming chunk bubble
-                      final streamingMsg = ChatMessageResponseModel(
-                        id: 'streaming_temp',
-                        sessionId: activeChatState.activeSessionId ?? '',
-                        role: 'assistant',
-                        content: activeChatState.currentStreamingResponse,
-                        createdAt: DateTime.now().toIso8601String(),
-                      );
-
-                      return ChatBubble(
-                        message: streamingMsg,
-                        isStreaming: true,
-                      );
-                    },
-                  ),
           ),
-          if (activeChatState.statusMessage != null)
-            SseStatusBanner(statusMessage: activeChatState.statusMessage!),
-          ChatInputBar(
-            isStreaming: isStreaming,
-            onSend: (prompt) {
-              ref.read(activeChatNotifierProvider.notifier).sendMessage(prompt);
-            },
+
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: ChatInputBar(
+              isStreaming: isStreaming,
+              bottomInset: bottomInset,
+              onSend: (prompt) {
+                ref
+                    .read(activeChatNotifierProvider.notifier)
+                    .sendMessage(prompt);
+              },
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, bool isDark) {
-    final theme = Theme.of(context);
+  Widget _buildEmptyState(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
 
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
-                color: AppColors.primaryContainer,
-                shape: BoxShape.circle,
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      behavior: HitTestBehavior.opaque,
+      child: Align(
+        alignment: const Alignment(0, -0.2),
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (scrollNotification) {
+            if (scrollNotification is ScrollStartNotification) {
+              FocusScope.of(context).unfocus();
+            }
+            return false;
+          },
+          child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: EdgeInsets.only(
+              left: 20.0,
+              right: 20.0,
+              top: 20.0,
+              bottom: isMobile ? 180.0 : 120.0,
+            ),
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 540),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              child: const Icon(
-                Icons.auto_awesome_rounded,
-                size: 48,
-                color: AppColors.primary,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFFF7ED),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.auto_awesome_rounded,
+                      size: 44,
+                      color: AppColors.secondary,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  const Text(
+                    'How can I help with your nutrition today?',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF0F172A),
+                      letterSpacing: -0.2,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Ask for calorie advice, log a meal in plain text, or check your daily macro targets.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF64748B),
+                      height: 1.4,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 10,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      _buildSuggestionChip(
+                        context,
+                        'I ate 300g chicken biryani for lunch',
+                      ),
+                      _buildSuggestionChip(
+                        context,
+                        'What should my target protein intake be?',
+                      ),
+                      _buildSuggestionChip(
+                        context,
+                        'How many calories are in 2 bananas?',
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            Text(
-              'How can I help with your nutrition today?',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: isDark
-                    ? AppColors.darkTextPrimary
-                    : AppColors.lightTextPrimary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Ask for calorie advice, log a meal in plain text, or check your daily macro targets.',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.lightTextMuted,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              alignment: WrapAlignment.center,
-              children: [
-                _buildSuggestionChip(
-                  context,
-                  'I ate 300g chicken biryani for lunch',
-                ),
-                _buildSuggestionChip(
-                  context,
-                  'What should my target protein intake be?',
-                ),
-                _buildSuggestionChip(
-                  context,
-                  'How many calories are in 2 bananas?',
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildSuggestionChip(BuildContext context, String text) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return ActionChip(
-      label: Text(text),
-      labelStyle: theme.textTheme.labelMedium?.copyWith(
-        color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary,
+      avatar: const Icon(
+        Icons.flash_on_rounded,
+        size: 14,
+        color: AppColors.secondary,
       ),
-      backgroundColor: isDark ? AppColors.darkCard : AppColors.lightSurface,
+      label: Text(text),
+      labelStyle: const TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w700,
+        color: Color(0xFF0F172A),
+      ),
+      backgroundColor: const Color(0xFFF8FAFC),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
-        ),
+        side: const BorderSide(color: Color(0xFFE2E8F0), width: 1.2),
       ),
       onPressed: () {
         ref.read(activeChatNotifierProvider.notifier).sendMessage(text);

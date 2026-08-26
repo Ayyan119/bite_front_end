@@ -4,6 +4,8 @@ import 'package:bite_front_end/features/chat/data/models/chat_session_response_m
 import 'package:bite_front_end/features/chat/data/models/sse_event_model.dart';
 import 'package:bite_front_end/features/chat/data/repositories/chat_repository.dart';
 import 'package:bite_front_end/features/chat/presentation/providers/chat_sessions_provider.dart';
+import 'package:bite_front_end/features/dashboard/presentation/providers/dashboard_provider.dart';
+import 'package:bite_front_end/features/profile/presentation/providers/profile_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum StreamStatus { idle, connecting, streaming, error }
@@ -205,5 +207,30 @@ class ActiveChatNotifier extends StateNotifier<ActiveChatState> {
 
     // Refresh session list drawer
     _ref.read(chatSessionsProvider.notifier).fetchSessions();
+
+    // Automatically invalidate & trigger state refresh for Dashboard and Profile
+    // so any meal adds/deletes/updates or profile goal changes via chatbot render instantly!
+    _invalidateAppProviders();
+  }
+
+  void _invalidateAppProviders() {
+    final now = DateTime.now();
+    final todayStr = formatDateString(now);
+    final selectedDate = _ref.read(selectedDashboardDateProvider);
+    final selectedDateStr = formatDateString(selectedDate);
+    final yesterdayStr = formatDateString(
+      now.subtract(const Duration(days: 1)),
+    );
+    final twoDaysAgoStr = formatDateString(
+      now.subtract(const Duration(days: 2)),
+    );
+
+    _ref.invalidate(dailyDashboardProvider(todayStr));
+    _ref.invalidate(dailyDashboardProvider(selectedDateStr));
+    _ref.invalidate(dailyDashboardProvider(yesterdayStr));
+    _ref.invalidate(dailyDashboardProvider(twoDaysAgoStr));
+    _ref.invalidate(historicalAnalyticsProvider(7));
+    _ref.invalidate(historicalAnalyticsProvider(30));
+    _ref.invalidate(profileNotifierProvider);
   }
 }

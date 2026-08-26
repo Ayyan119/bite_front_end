@@ -1,9 +1,10 @@
 import 'package:bite_front_end/core/theme/app_colors.dart';
+import 'package:bite_front_end/core/widgets/bite_floating_nav_bar.dart';
 import 'package:bite_front_end/core/widgets/bite_offline_banner.dart';
 import 'package:bite_front_end/features/home/presentation/widgets/app_navigation_rail.dart';
 import 'package:flutter/material.dart';
 
-class BiteAppShell extends StatelessWidget {
+class BiteAppShell extends StatefulWidget {
   final int selectedIndex;
   final ValueChanged<int> onTabSelected;
   final List<Widget> children;
@@ -18,16 +19,51 @@ class BiteAppShell extends StatelessWidget {
   });
 
   @override
+  State<BiteAppShell> createState() => _BiteAppShellState();
+}
+
+class _BiteAppShellState extends State<BiteAppShell> {
+  late final PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: widget.selectedIndex);
+  }
+
+  @override
+  void didUpdateWidget(covariant BiteAppShell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedIndex != widget.selectedIndex) {
+      FocusManager.instance.primaryFocus?.unfocus();
+      if (_pageController.hasClients) {
+        _pageController.animateToPage(
+          widget.selectedIndex,
+          duration: const Duration(milliseconds: 380),
+          curve: Curves.fastOutSlowIn,
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final isDesktopOrTablet = width >= 600;
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+
+    final wrappedChildren = widget.children
+        .map((child) => _KeepAliveWrapper(child: child))
+        .toList();
 
     return Scaffold(
-      backgroundColor: isDark
-          ? AppColors.darkBackground
-          : AppColors.lightBackground,
+      backgroundColor: AppColors.lightBackground,
       body: Column(
         children: [
           const BiteOfflineBanner(),
@@ -36,75 +72,70 @@ class BiteAppShell extends StatelessWidget {
                 ? Row(
                     children: [
                       AppNavigationRail(
-                        selectedIndex: selectedIndex,
-                        onDestinationSelected: onTabSelected,
+                        selectedIndex: widget.selectedIndex,
+                        onDestinationSelected: widget.onTabSelected,
                       ),
                       const VerticalDivider(thickness: 1, width: 1),
                       Expanded(
-                        child: IndexedStack(
-                          index: selectedIndex,
-                          children: children,
+                        child: PageView(
+                          controller: _pageController,
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: wrappedChildren,
                         ),
                       ),
                     ],
                   )
-                : IndexedStack(index: selectedIndex, children: children),
+                : Stack(
+                    children: [
+                      Positioned.fill(
+                        child: PageView(
+                          controller: _pageController,
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: wrappedChildren,
+                        ),
+                      ),
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: AnimatedSlide(
+                          offset: isKeyboardOpen
+                              ? const Offset(0, 1.5)
+                              : Offset.zero,
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeInOutCubic,
+                          child: BiteFloatingNavBar(
+                            selectedIndex: widget.selectedIndex,
+                            onTabSelected: widget.onTabSelected,
+                            onQuickLogPressed: widget.onQuickLogPressed,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
           ),
         ],
       ),
-      floatingActionButton: (!isDesktopOrTablet && onQuickLogPressed != null)
-          ? FloatingActionButton(
-              onPressed: onQuickLogPressed,
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              tooltip: 'Quick Log Meal',
-              child: const Icon(Icons.add_a_photo_outlined),
-            )
-          : null,
-      bottomNavigationBar: isDesktopOrTablet
-          ? null
-          : NavigationBar(
-              selectedIndex: selectedIndex,
-              onDestinationSelected: onTabSelected,
-              backgroundColor: isDark
-                  ? AppColors.darkSurface
-                  : AppColors.lightSurface,
-              indicatorColor: AppColors.primaryContainer,
-              destinations: const [
-                NavigationDestination(
-                  icon: Icon(Icons.dashboard_outlined),
-                  selectedIcon: Icon(
-                    Icons.dashboard,
-                    color: AppColors.primaryDark,
-                  ),
-                  label: 'Dashboard',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.camera_alt_outlined),
-                  selectedIcon: Icon(
-                    Icons.camera_alt,
-                    color: AppColors.primaryDark,
-                  ),
-                  label: 'Meals',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.chat_bubble_outline),
-                  selectedIcon: Icon(
-                    Icons.chat_bubble,
-                    color: AppColors.primaryDark,
-                  ),
-                  label: 'AI Assistant',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.person_outline),
-                  selectedIcon: Icon(
-                    Icons.person,
-                    color: AppColors.primaryDark,
-                  ),
-                  label: 'Profile',
-                ),
-              ],
-            ),
     );
+  }
+}
+
+class _KeepAliveWrapper extends StatefulWidget {
+  final Widget child;
+  const _KeepAliveWrapper({required this.child});
+
+  @override
+  State<_KeepAliveWrapper> createState() => _KeepAliveWrapperState();
+}
+
+class _KeepAliveWrapperState extends State<_KeepAliveWrapper>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
   }
 }
