@@ -45,7 +45,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     final topPadding =
         (kToolbarHeight + 14.0 + MediaQuery.of(context).padding.top + 8.0) *
-            0.65;
+        0.65;
 
     return Scaffold(
       backgroundColor: AppColors.lightBackground,

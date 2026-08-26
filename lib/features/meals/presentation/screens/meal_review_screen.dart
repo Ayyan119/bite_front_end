@@ -103,8 +103,11 @@ class _MealReviewScreenState extends ConsumerState<MealReviewScreen>
     final canConfirm = hasItems && !isCommitting;
 
     final topPadding =
-        (kToolbarHeight + 14.0 + MediaQuery.of(context).padding.top + AppSpacing.sm) *
-            0.65;
+        (kToolbarHeight +
+            14.0 +
+            MediaQuery.of(context).padding.top +
+            AppSpacing.sm) *
+        0.65;
 
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
@@ -136,276 +139,272 @@ class _MealReviewScreenState extends ConsumerState<MealReviewScreen>
                 left: AppSpacing.md,
                 right: AppSpacing.md,
               ),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 600),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Image Thumbnail Header (if present)
-                        if (state.selectedFile != null ||
-                            (state.imageUrl != null &&
-                                state.imageUrl!.isNotEmpty)) ...[
-                          BiteFadeSlide(
-                            delay: Duration.zero,
-                            child: Container(
-                              height: 170,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(24),
-                                border: Border.all(
-                                  color: const Color(0xFFE2E8F0),
-                                  width: 1.2,
-                                ),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Image Thumbnail Header (if present)
+                      if (state.selectedFile != null ||
+                          (state.imageUrl != null &&
+                              state.imageUrl!.isNotEmpty)) ...[
+                        BiteFadeSlide(
+                          delay: Duration.zero,
+                          child: Container(
+                            height: 170,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(
+                                color: const Color(0xFFE2E8F0),
+                                width: 1.2,
                               ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(24),
-                                child: Hero(
-                                  tag: 'meal-image-preview',
-                                  child: state.selectedFile != null
-                                      ? (kIsWeb
-                                            ? FutureBuilder<Uint8List>(
-                                                future: state.selectedFile!
-                                                    .readAsBytes(),
-                                                builder: (context, snapshot) {
-                                                  if (snapshot.hasData) {
-                                                    return Image.memory(
-                                                      snapshot.data!,
-                                                      fit: BoxFit.cover,
-                                                    );
-                                                  }
-                                                  return const SizedBox();
-                                                },
-                                              )
-                                            : Image.file(
-                                                File(state.selectedFile!.path),
-                                                fit: BoxFit.cover,
-                                              ))
-                                      : Image.network(
-                                          state.imageUrl!,
-                                          fit: BoxFit.cover,
-                                        ),
-                                ),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(24),
+                              child: Hero(
+                                tag: 'meal-image-preview',
+                                child: state.selectedFile != null
+                                    ? (kIsWeb
+                                          ? FutureBuilder<Uint8List>(
+                                              future: state.selectedFile!
+                                                  .readAsBytes(),
+                                              builder: (context, snapshot) {
+                                                if (snapshot.hasData) {
+                                                  return Image.memory(
+                                                    snapshot.data!,
+                                                    fit: BoxFit.cover,
+                                                  );
+                                                }
+                                                return const SizedBox();
+                                              },
+                                            )
+                                          : Image.file(
+                                              File(state.selectedFile!.path),
+                                              fit: BoxFit.cover,
+                                            ))
+                                    : Image.network(
+                                        state.imageUrl!,
+                                        fit: BoxFit.cover,
+                                      ),
                               ),
                             ),
                           ),
-                          const SizedBox(height: AppSpacing.md),
-                        ],
-
-                        // Meal Type & Item Count Badge
-                        BiteFadeSlide(
-                          delay: const Duration(milliseconds: 80),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.secondary,
-                                  borderRadius: AppRadius.pillBorder,
-                                ),
-                                child: Text(
-                                  state.selectedMealType.toUpperCase(),
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 1.0,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                '${state.items.length} Food Item(s) Detected',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF64748B),
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
                         const SizedBox(height: AppSpacing.md),
-
-                        // Animated Macro Summary Bar
-                        BiteFadeSlide(
-                          delay: const Duration(milliseconds: 160),
-                          child: MacroSummaryBar(
-                            calories: state.totalCalories,
-                            proteinG: state.totalProtein,
-                            carbsG: state.totalCarbs,
-                            fatG: state.totalFat,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-
-                        // Detected Items Section Title & List
-                        BiteFadeSlide(
-                          delay: const Duration(milliseconds: 240),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'DETECTED FOOD ITEMS',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1.2,
-                                  color: Color(0xFF0F172A),
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-
-                              // List of Detected Items
-                              if (state.items.isEmpty)
-                                Container(
-                                  padding: const EdgeInsets.all(24),
-                                  alignment: Alignment.center,
-                                  child: const Text(
-                                    'No food items detected in meal photo.',
-                                    style: TextStyle(color: Color(0xFF64748B)),
-                                  ),
-                                )
-                              else
-                                ListView.builder(
-                                  padding: EdgeInsets.zero,
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: state.items.length,
-                                  itemBuilder: (context, index) {
-                                    final item = state.items[index];
-                                    return DetectedItemCard(
-                                      key: ValueKey('${item.foodName}_$index'),
-                                      item: item,
-                                      onPortionChanged: (newAmount) {
-                                        notifier.updateItemPortion(
-                                          index,
-                                          newAmount,
-                                        );
-                                      },
-                                      onDelete: () =>
-                                          notifier.removeItem(index),
-                                    );
-                                  },
-                                ),
-                            ],
-                          ),
-                        ),
                       ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
 
-            // Sticky Bottom Confirmation Action Bar
-            BiteFadeSlide(
-              delay: const Duration(milliseconds: 320),
-              child: Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    top: BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
-                  ),
-                ),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 600),
-                    child: Container(
-                      width: double.infinity,
-                      height: 54,
-                      decoration: BoxDecoration(
-                        gradient: canConfirm
-                            ? const LinearGradient(
-                                colors: [
-                                  AppColors.secondary,
-                                  Color(0xFFFF7700),
-                                ],
-                              )
-                            : null,
-                        color: canConfirm ? null : const Color(0xFFE2E8F0),
-                        borderRadius: AppRadius.pillBorder,
-                        boxShadow: canConfirm
-                            ? [
-                                BoxShadow(
-                                  color: AppColors.secondary.withValues(
-                                    alpha: 0.38,
-                                  ),
-                                  blurRadius: 16,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ]
-                            : [],
-                      ),
-                      child: ElevatedButton.icon(
-                        onPressed: canConfirm ? _confirmMeal : null,
-                        icon: isCommitting
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
+                      // Meal Type & Item Count Badge
+                      BiteFadeSlide(
+                        delay: const Duration(milliseconds: 80),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.secondary,
+                                borderRadius: AppRadius.pillBorder,
+                              ),
+                              child: Text(
+                                state.selectedMealType.toUpperCase(),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 1.0,
                                   color: Colors.white,
                                 ),
-                              )
-                            : (_isSuccessAnim
-                                  ? ScaleTransition(
-                                      scale: _scaleAnimation,
-                                      child: const Icon(
-                                        Icons.check_circle,
-                                        size: 24,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : Icon(
-                                      hasItems
-                                          ? Icons.check_rounded
-                                          : Icons.block_rounded,
-                                      size: 22,
-                                      color: canConfirm
-                                          ? Colors.white
-                                          : const Color(0xFF94A3B8),
-                                    )),
-                        label: Text(
-                          isCommitting
-                              ? 'SAVING MEAL LOG...'
-                              : (_isSuccessAnim
-                                    ? 'MEAL LOGGED!'
-                                    : (hasItems
-                                          ? 'CONFIRM & LOG MEAL'
-                                          : 'NO FOOD ITEMS DETECTED')),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.8,
-                            color: canConfirm
-                                ? Colors.white
-                                : const Color(0xFF94A3B8),
-                          ),
+                              ),
+                            ),
+                            Text(
+                              '${state.items.length} Food Item(s) Detected',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF64748B),
+                              ),
+                            ),
+                          ],
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          foregroundColor: canConfirm
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+
+                      // Animated Macro Summary Bar
+                      BiteFadeSlide(
+                        delay: const Duration(milliseconds: 160),
+                        child: MacroSummaryBar(
+                          calories: state.totalCalories,
+                          proteinG: state.totalProtein,
+                          carbsG: state.totalCarbs,
+                          fatG: state.totalFat,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+
+                      // Detected Items Section Title & List
+                      BiteFadeSlide(
+                        delay: const Duration(milliseconds: 240),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'DETECTED FOOD ITEMS',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 1.2,
+                                color: Color(0xFF0F172A),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+
+                            // List of Detected Items
+                            if (state.items.isEmpty)
+                              Container(
+                                padding: const EdgeInsets.all(24),
+                                alignment: Alignment.center,
+                                child: const Text(
+                                  'No food items detected in meal photo.',
+                                  style: TextStyle(color: Color(0xFF64748B)),
+                                ),
+                              )
+                            else
+                              ListView.builder(
+                                padding: EdgeInsets.zero,
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: state.items.length,
+                                itemBuilder: (context, index) {
+                                  final item = state.items[index];
+                                  return DetectedItemCard(
+                                    key: ValueKey('${item.foodName}_$index'),
+                                    item: item,
+                                    onPortionChanged: (newAmount) {
+                                      notifier.updateItemPortion(
+                                        index,
+                                        newAmount,
+                                      );
+                                    },
+                                    onDelete: () => notifier.removeItem(index),
+                                  );
+                                },
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // Sticky Bottom Confirmation Action Bar
+          BiteFadeSlide(
+            delay: const Duration(milliseconds: 320),
+            child: Container(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  top: BorderSide(color: Color(0xFFE2E8F0), width: 1.0),
+                ),
+              ),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  child: Container(
+                    width: double.infinity,
+                    height: 54,
+                    decoration: BoxDecoration(
+                      gradient: canConfirm
+                          ? const LinearGradient(
+                              colors: [AppColors.secondary, Color(0xFFFF7700)],
+                            )
+                          : null,
+                      color: canConfirm ? null : const Color(0xFFE2E8F0),
+                      borderRadius: AppRadius.pillBorder,
+                      boxShadow: canConfirm
+                          ? [
+                              BoxShadow(
+                                color: AppColors.secondary.withValues(
+                                  alpha: 0.38,
+                                ),
+                                blurRadius: 16,
+                                offset: const Offset(0, 4),
+                              ),
+                            ]
+                          : [],
+                    ),
+                    child: ElevatedButton.icon(
+                      onPressed: canConfirm ? _confirmMeal : null,
+                      icon: isCommitting
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.white,
+                              ),
+                            )
+                          : (_isSuccessAnim
+                                ? ScaleTransition(
+                                    scale: _scaleAnimation,
+                                    child: const Icon(
+                                      Icons.check_circle,
+                                      size: 24,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : Icon(
+                                    hasItems
+                                        ? Icons.check_rounded
+                                        : Icons.block_rounded,
+                                    size: 22,
+                                    color: canConfirm
+                                        ? Colors.white
+                                        : const Color(0xFF94A3B8),
+                                  )),
+                      label: Text(
+                        isCommitting
+                            ? 'SAVING MEAL LOG...'
+                            : (_isSuccessAnim
+                                  ? 'MEAL LOGGED!'
+                                  : (hasItems
+                                        ? 'CONFIRM & LOG MEAL'
+                                        : 'NO FOOD ITEMS DETECTED')),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.8,
+                          color: canConfirm
                               ? Colors.white
                               : const Color(0xFF94A3B8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: AppRadius.pillBorder,
-                          ),
-                          elevation: 0,
                         ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        foregroundColor: canConfirm
+                            ? Colors.white
+                            : const Color(0xFF94A3B8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: AppRadius.pillBorder,
+                        ),
+                        elevation: 0,
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          ],
-        ),
-      );
-    }
+          ),
+        ],
+      ),
+    );
   }
+}

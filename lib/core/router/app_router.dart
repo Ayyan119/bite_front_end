@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
@@ -7,12 +8,28 @@ import '../../features/splash/presentation/screens/splash_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/meals/presentation/screens/meal_review_screen.dart';
 
+class RouterNotifier extends ChangeNotifier {
+  final Ref _ref;
+
+  RouterNotifier(this._ref) {
+    _ref.listen(authNotifierProvider, (previous, next) {
+      notifyListeners();
+    });
+  }
+}
+
+final routerNotifierProvider = Provider<RouterNotifier>((ref) {
+  return RouterNotifier(ref);
+});
+
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authNotifierProvider);
+  final routerNotifier = ref.watch(routerNotifierProvider);
 
   return GoRouter(
     initialLocation: '/',
+    refreshListenable: routerNotifier,
     redirect: (context, state) {
+      final authState = ref.read(authNotifierProvider);
       final isLoading = authState.isLoading;
       final isAuthenticated = authState.valueOrNull != null;
       final matched = state.matchedLocation;

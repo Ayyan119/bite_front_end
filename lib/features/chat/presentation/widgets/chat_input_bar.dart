@@ -6,12 +6,14 @@ class ChatInputBar extends StatefulWidget {
   final ValueChanged<String> onSend;
   final bool isStreaming;
   final double bottomInset;
+  final FocusNode? focusNode;
 
   const ChatInputBar({
     super.key,
     required this.onSend,
     required this.isStreaming,
     this.bottomInset = 0.0,
+    this.focusNode,
   });
 
   @override
@@ -20,8 +22,10 @@ class ChatInputBar extends StatefulWidget {
 
 class _ChatInputBarState extends State<ChatInputBar> {
   final TextEditingController _controller = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
+  final FocusNode _internalFocusNode = FocusNode();
   bool _hasText = false;
+
+  FocusNode get _effectiveFocusNode => widget.focusNode ?? _internalFocusNode;
 
   @override
   void initState() {
@@ -39,7 +43,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
   @override
   void dispose() {
     _controller.dispose();
-    _focusNode.dispose();
+    _internalFocusNode.dispose();
     super.dispose();
   }
 
@@ -50,7 +54,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
     _controller.clear();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        _focusNode.requestFocus();
+        _effectiveFocusNode.requestFocus();
       }
     });
   }
@@ -98,7 +102,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
                       padding: const EdgeInsets.only(left: 12.0, right: 6.0),
                       child: TextField(
                         controller: _controller,
-                        focusNode: _focusNode,
+                        focusNode: _effectiveFocusNode,
                         enabled: true,
                         readOnly: widget.isStreaming,
                         textInputAction: TextInputAction.send,

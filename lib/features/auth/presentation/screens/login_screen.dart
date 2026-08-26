@@ -26,7 +26,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _obscurePassword = true;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(authNotifierProvider.notifier).clearError();
+    });
+    _emailController.addListener(_onEmailChanged);
+  }
+
+  void _onEmailChanged() {
+    if (ref.read(authNotifierProvider).hasError) {
+      ref.read(authNotifierProvider.notifier).clearError();
+    }
+  }
+
+  @override
   void dispose() {
+    _emailController.removeListener(_onEmailChanged);
     _emailController.dispose();
     _passwordController.dispose();
     _emailFocusNode.dispose();

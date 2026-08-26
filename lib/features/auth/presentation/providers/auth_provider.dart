@@ -51,4 +51,10 @@ class AuthNotifier extends AsyncNotifier<AuthResponseModel?> {
     ref.invalidate(profileNotifierProvider);
     state = const AsyncValue.data(null);
   }
+
+  void clearError() {
+    if (state.hasError) {
+      state = AsyncValue.data(state.valueOrNull);
+    }
+  }
 }

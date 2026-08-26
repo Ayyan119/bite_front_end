@@ -53,7 +53,7 @@ class DashboardScreen extends ConsumerWidget {
 
     final topPadding =
         (kToolbarHeight + 14.0 + MediaQuery.of(context).padding.top + 8.0) *
-            0.65;
+        0.65;
 
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
@@ -72,133 +72,132 @@ class DashboardScreen extends ConsumerWidget {
             left: AppSpacing.lg,
             right: AppSpacing.lg,
           ),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 600),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Date Selection Capsule Bar (Today, Yesterday, no tomorrow)
-                    const DateSelectorBar(),
-                    const SizedBox(height: AppSpacing.lg),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Date Selection Capsule Bar (Today, Yesterday, no tomorrow)
+                  const DateSelectorBar(),
+                  const SizedBox(height: AppSpacing.lg),
 
-                    dashboardAsync.when(
-                      data: (dashboard) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            BiteFadeSlide(
-                              delay: Duration.zero,
-                              duration: const Duration(milliseconds: 400),
-                              child: CalorieProgressRing(
-                                targetCalories: dashboard.targetCalories,
-                                consumedCalories: dashboard.consumedCalories,
-                                remainingCalories: dashboard.remainingCalories,
-                                onLogMealPressed: () =>
-                                    context.push('/meals/log'),
-                              ),
+                  dashboardAsync.when(
+                    data: (dashboard) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          BiteFadeSlide(
+                            delay: Duration.zero,
+                            duration: const Duration(milliseconds: 400),
+                            child: CalorieProgressRing(
+                              targetCalories: dashboard.targetCalories,
+                              consumedCalories: dashboard.consumedCalories,
+                              remainingCalories: dashboard.remainingCalories,
+                              onLogMealPressed: () =>
+                                  context.push('/meals/log'),
                             ),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          BiteFadeSlide(
+                            delay: const Duration(milliseconds: 100),
+                            duration: const Duration(milliseconds: 400),
+                            child: MacroCardsGrid(
+                              currentProteinG: dashboard.protein.consumed,
+                              targetProteinG: dashboard.protein.target,
+                              currentCarbsG: dashboard.carbs.consumed,
+                              targetCarbsG: dashboard.carbs.target,
+                              currentFatG: dashboard.fat.consumed,
+                              targetFatG: dashboard.fat.target,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          BiteFadeSlide(
+                            delay: const Duration(milliseconds: 200),
+                            duration: const Duration(milliseconds: 400),
+                            child: LoggedMealsList(meals: dashboard.meals),
+                          ),
+                          if (dashboard.topMicronutrients.isNotEmpty) ...[
                             const SizedBox(height: AppSpacing.lg),
                             BiteFadeSlide(
-                              delay: const Duration(milliseconds: 100),
+                              delay: const Duration(milliseconds: 300),
                               duration: const Duration(milliseconds: 400),
-                              child: MacroCardsGrid(
-                                currentProteinG: dashboard.protein.consumed,
-                                targetProteinG: dashboard.protein.target,
-                                currentCarbsG: dashboard.carbs.consumed,
-                                targetCarbsG: dashboard.carbs.target,
-                                currentFatG: dashboard.fat.consumed,
-                                targetFatG: dashboard.fat.target,
+                              child: TopMicronutrientsCard(
+                                topMicronutrients: dashboard.topMicronutrients,
                               ),
-                            ),
-                            const SizedBox(height: AppSpacing.lg),
-                            BiteFadeSlide(
-                              delay: const Duration(milliseconds: 200),
-                              duration: const Duration(milliseconds: 400),
-                              child: LoggedMealsList(meals: dashboard.meals),
-                            ),
-                            if (dashboard.topMicronutrients.isNotEmpty) ...[
-                              const SizedBox(height: AppSpacing.lg),
-                              BiteFadeSlide(
-                                delay: const Duration(milliseconds: 300),
-                                duration: const Duration(milliseconds: 400),
-                                child: TopMicronutrientsCard(
-                                  topMicronutrients:
-                                      dashboard.topMicronutrients,
-                                ),
-                              ),
-                            ],
-                            const SizedBox(height: AppSpacing.lg),
-                            const BiteFadeSlide(
-                              delay: Duration(milliseconds: 400),
-                              duration: Duration(milliseconds: 400),
-                              child: HistoricalAnalyticsChart(),
-                            ),
-                            const SizedBox(height: 90),
-                          ],
-                        );
-                      },
-                      loading: () => BiteShimmer(
-                        child: Column(
-                          children: const [
-                            SizedBox(height: 20),
-                            BiteShimmerBox(width: double.infinity, height: 260),
-                            SizedBox(height: 16),
-                            BiteShimmerBox(width: double.infinity, height: 100),
-                            SizedBox(height: 16),
-                            BiteShimmerBox(width: double.infinity, height: 150),
-                          ],
-                        ),
-                      ),
-                      error: (error, stackTrace) => AppCard(
-                        backgroundColor: Colors.white,
-                        padding: const EdgeInsets.all(AppSpacing.xl),
-                        child: Column(
-                          children: [
-                            const Icon(
-                              Icons.error_outline,
-                              color: AppColors.error,
-                              size: 36,
-                            ),
-                            const SizedBox(height: AppSpacing.md),
-                            const Text(
-                              'Could Not Load Dashboard',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.lightTextPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.xs),
-                            Text(
-                              error.toString().replaceAll(
-                                'ServerException: ',
-                                '',
-                              ),
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: AppColors.lightTextSecondary,
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.lg),
-                            AppButton(
-                              label: 'Try Again',
-                              onPressed: () {
-                                ref.invalidate(dailyDashboardProvider(dateStr));
-                              },
-                              variant: AppButtonVariant.primary,
                             ),
                           ],
-                        ),
+                          const SizedBox(height: AppSpacing.lg),
+                          const BiteFadeSlide(
+                            delay: Duration(milliseconds: 400),
+                            duration: Duration(milliseconds: 400),
+                            child: HistoricalAnalyticsChart(),
+                          ),
+                          const SizedBox(height: 90),
+                        ],
+                      );
+                    },
+                    loading: () => BiteShimmer(
+                      child: Column(
+                        children: const [
+                          SizedBox(height: 20),
+                          BiteShimmerBox(width: double.infinity, height: 260),
+                          SizedBox(height: 16),
+                          BiteShimmerBox(width: double.infinity, height: 100),
+                          SizedBox(height: 16),
+                          BiteShimmerBox(width: double.infinity, height: 150),
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                    error: (error, stackTrace) => AppCard(
+                      backgroundColor: Colors.white,
+                      padding: const EdgeInsets.all(AppSpacing.xl),
+                      child: Column(
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
+                            color: AppColors.error,
+                            size: 36,
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          const Text(
+                            'Could Not Load Dashboard',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.lightTextPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            error.toString().replaceAll(
+                              'ServerException: ',
+                              '',
+                            ),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppColors.lightTextSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          AppButton(
+                            label: 'Try Again',
+                            onPressed: () {
+                              ref.invalidate(dailyDashboardProvider(dateStr));
+                            },
+                            variant: AppButtonVariant.primary,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         ),
-      );
-    }
+      ),
+    );
   }
+}

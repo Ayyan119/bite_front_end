@@ -1,11 +1,11 @@
 {
-    "name": "AI Bite",
-    "short_name": "AI Bite",
+    "name": "Bite",
+    "short_name": "Bite",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#F8FAFC",
     "theme_color": "#FF5500",
-    "description": "AI Bite - Intelligent Calorie & Macro Tracker",
+    "description": "Bite - Intelligent Calorie & Macro Tracker",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

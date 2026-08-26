@@ -112,8 +112,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           if (lower.contains('already') ||
               lower.contains('exist') ||
               lower.contains('registered') ||
-              lower.contains('duplicate')) {
-            return 'Email address is already registered. Please log in instead.';
+              lower.contains('duplicate') ||
+              lower.contains('in use') ||
+              lower.contains('taken')) {
+            return 'An account with this email address already exists. Please log in or use a different email.';
           }
           return detail;
         }
@@ -131,7 +133,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         }
       }
       if (data.containsKey('message') && data['message'] != null) {
-        return data['message'].toString();
+        final msgStr = data['message'].toString();
+        final lower = msgStr.toLowerCase();
+        if (lower.contains('already') ||
+            lower.contains('exist') ||
+            lower.contains('registered') ||
+            lower.contains('duplicate') ||
+            lower.contains('in use') ||
+            lower.contains('taken')) {
+          return 'An account with this email address already exists. Please log in or use a different email.';
+        }
+        return msgStr;
       }
     }
 
@@ -140,7 +152,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       return 'Incorrect email or password. Please try again.';
     }
     if (statusCode == 409) {
-      return 'An account with this email address already exists.';
+      return 'An account with this email address already exists. Please log in or use a different email.';
     }
     if (statusCode == 422) {
       return 'Invalid input details. Please check your information and try again.';

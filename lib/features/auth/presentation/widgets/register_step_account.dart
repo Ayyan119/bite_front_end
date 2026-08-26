@@ -6,6 +6,7 @@ class RegisterStepAccount extends StatefulWidget {
   final TextEditingController passwordController;
   final TextEditingController confirmPasswordController;
   final TextEditingController nameController;
+  final FocusNode? emailFocusNode;
   final VoidCallback? onSubmitted;
 
   const RegisterStepAccount({
@@ -14,6 +15,7 @@ class RegisterStepAccount extends StatefulWidget {
     required this.passwordController,
     required this.confirmPasswordController,
     required this.nameController,
+    this.emailFocusNode,
     this.onSubmitted,
   });
 
@@ -25,14 +27,32 @@ class _RegisterStepAccountState extends State<RegisterStepAccount> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   final _nameFocusNode = FocusNode();
-  final _emailFocusNode = FocusNode();
+  final _internalEmailFocusNode = FocusNode();
   final _passwordFocusNode = FocusNode();
   final _confirmPasswordFocusNode = FocusNode();
 
+  FocusNode get _effectiveEmailFocusNode =>
+      widget.emailFocusNode ?? _internalEmailFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.passwordController.addListener(_onPasswordChanged);
+    widget.confirmPasswordController.addListener(_onPasswordChanged);
+  }
+
+  void _onPasswordChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   @override
   void dispose() {
+    widget.passwordController.removeListener(_onPasswordChanged);
+    widget.confirmPasswordController.removeListener(_onPasswordChanged);
     _nameFocusNode.dispose();
-    _emailFocusNode.dispose();
+    _internalEmailFocusNode.dispose();
     _passwordFocusNode.dispose();
     _confirmPasswordFocusNode.dispose();
     super.dispose();
@@ -67,10 +87,11 @@ class _RegisterStepAccountState extends State<RegisterStepAccount> {
         TextFormField(
           controller: widget.nameController,
           focusNode: _nameFocusNode,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           textCapitalization: TextCapitalization.words,
           textInputAction: TextInputAction.next,
           onFieldSubmitted: (_) {
-            FocusScope.of(context).requestFocus(_emailFocusNode);
+            FocusScope.of(context).requestFocus(_effectiveEmailFocusNode);
           },
           style: const TextStyle(
             color: Color(0xFF0F172A),
@@ -126,7 +147,8 @@ class _RegisterStepAccountState extends State<RegisterStepAccount> {
         // Email Address Field
         TextFormField(
           controller: widget.emailController,
-          focusNode: _emailFocusNode,
+          focusNode: _effectiveEmailFocusNode,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
           onFieldSubmitted: (_) {
@@ -193,6 +215,7 @@ class _RegisterStepAccountState extends State<RegisterStepAccount> {
         TextFormField(
           controller: widget.passwordController,
           focusNode: _passwordFocusNode,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           obscureText: _obscurePassword,
           textInputAction: TextInputAction.next,
           onFieldSubmitted: (_) {
@@ -272,6 +295,7 @@ class _RegisterStepAccountState extends State<RegisterStepAccount> {
         TextFormField(
           controller: widget.confirmPasswordController,
           focusNode: _confirmPasswordFocusNode,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           obscureText: _obscureConfirmPassword,
           textInputAction: TextInputAction.done,
           onFieldSubmitted: (_) {

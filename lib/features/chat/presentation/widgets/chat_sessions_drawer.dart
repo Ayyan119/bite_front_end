@@ -6,14 +6,32 @@ import 'package:bite_front_end/features/chat/presentation/providers/active_chat_
 import 'package:bite_front_end/features/chat/presentation/providers/chat_sessions_provider.dart';
 import 'package:bite_front_end/features/chat/presentation/widgets/animated_delete_button.dart';
 import 'package:bite_front_end/features/chat/presentation/widgets/delete_confirmation_dialog.dart';
+import 'package:bite_front_end/features/home/presentation/providers/home_tab_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 class ChatSessionsDrawer extends ConsumerWidget {
   final VoidCallback? onSessionSelected;
+  final VoidCallback? onNewChatPressed;
 
-  const ChatSessionsDrawer({super.key, this.onSessionSelected});
+  const ChatSessionsDrawer({
+    super.key,
+    this.onSessionSelected,
+    this.onNewChatPressed,
+  });
+
+  void _closeDrawer(BuildContext context) {
+    final scaffold = Scaffold.maybeOf(context);
+    if (scaffold != null && scaffold.isDrawerOpen) {
+      scaffold.closeDrawer();
+    } else {
+      final nav = Navigator.of(context, rootNavigator: false);
+      if (nav.canPop()) {
+        nav.pop();
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -138,11 +156,11 @@ class ChatSessionsDrawer extends ConsumerWidget {
                           ref
                               .read(activeChatNotifierProvider.notifier)
                               .startNewSession();
-                          if (onSessionSelected != null) {
-                            onSessionSelected!();
-                          } else {
-                            Navigator.of(context).maybePop();
+                          ref.read(homeTabIndexProvider.notifier).state = 2;
+                          if (onNewChatPressed != null) {
+                            onNewChatPressed!();
                           }
+                          _closeDrawer(context);
                         },
                         icon: const Icon(
                           Icons.add_rounded,
@@ -403,11 +421,11 @@ class ChatSessionsDrawer extends ConsumerWidget {
             ref
                 .read(activeChatNotifierProvider.notifier)
                 .loadSession(session.id);
+            ref.read(homeTabIndexProvider.notifier).state = 2;
             if (onSessionSelected != null) {
               onSessionSelected!();
-            } else {
-              Navigator.of(context).maybePop();
             }
+            _closeDrawer(context);
           },
         ),
       ),

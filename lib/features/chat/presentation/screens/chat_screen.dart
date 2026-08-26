@@ -21,11 +21,30 @@ class ChatScreen extends ConsumerStatefulWidget {
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final ScrollController _scrollController = ScrollController();
+  final FocusNode _inputFocusNode = FocusNode();
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _inputFocusNode.dispose();
     super.dispose();
+  }
+
+  void _focusInput() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _inputFocusNode.requestFocus();
+      }
+    });
+  }
+
+  void _unfocusInput() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        FocusScope.of(context).unfocus();
+        _inputFocusNode.unfocus();
+      }
+    });
   }
 
   void _scrollToBottom() {
@@ -65,7 +84,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             backgroundColor: AppColors.lightBackground,
             body: Row(
               children: [
-                const SizedBox(width: 280, child: ChatSessionsDrawer()),
+                SizedBox(
+                  width: 280,
+                  child: ChatSessionsDrawer(
+                    onNewChatPressed: _focusInput,
+                    onSessionSelected: _unfocusInput,
+                  ),
+                ),
                 const VerticalDivider(
                   width: 1,
                   thickness: 1,
@@ -120,13 +145,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         : '👤';
 
     final topPadding =
-        (kToolbarHeight + 14.0 + MediaQuery.of(context).padding.top + 8.0) *
-            0.65;
+        kToolbarHeight + 14.0 + MediaQuery.of(context).padding.top + 16.0;
 
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
       extendBodyBehindAppBar: true,
-      drawer: showDrawerButton ? const ChatSessionsDrawer() : null,
+      drawer: showDrawerButton
+          ? ChatSessionsDrawer(
+              onNewChatPressed: _focusInput,
+              onSessionSelected: _unfocusInput,
+            )
+          : null,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -205,6 +234,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             tooltip: 'New Chat',
             onPressed: () {
               ref.read(activeChatNotifierProvider.notifier).startNewSession();
+              _focusInput();
             },
           ),
           GestureDetector(
@@ -350,6 +380,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       ref
                           .read(activeChatNotifierProvider.notifier)
                           .startNewSession();
+                      _focusInput();
                     },
                     customBorder: const CircleBorder(),
                     child: Container(
@@ -390,6 +421,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             right: 0,
             bottom: 0,
             child: ChatInputBar(
+              focusNode: _inputFocusNode,
               isStreaming: isStreaming,
               bottomInset: bottomInset,
               onSend: (prompt) {
@@ -407,8 +439,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Widget _buildEmptyState(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 600;
     final topPadding =
-        (kToolbarHeight + 14.0 + MediaQuery.of(context).padding.top + 16.0) *
-            0.65;
+        kToolbarHeight + 14.0 + MediaQuery.of(context).padding.top + 16.0;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),

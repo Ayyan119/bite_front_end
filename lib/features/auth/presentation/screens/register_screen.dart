@@ -25,11 +25,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   int _currentStep = 0;
   final _formKey = GlobalKey<FormState>();
 
-  // Step 1 Controllers
+  // Step 1 Controllers & FocusNodes
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _nameController = TextEditingController();
+  final _emailFocusNode = FocusNode();
 
   // Step 2 Controllers & State (Empty by default)
   final _ageController = TextEditingController();
@@ -42,11 +43,28 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   String? _primaryGoal;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(authNotifierProvider.notifier).clearError();
+    });
+    _emailController.addListener(_onEmailChanged);
+  }
+
+  void _onEmailChanged() {
+    if (ref.read(authNotifierProvider).hasError) {
+      ref.read(authNotifierProvider.notifier).clearError();
+    }
+  }
+
+  @override
   void dispose() {
+    _emailController.removeListener(_onEmailChanged);
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _nameController.dispose();
+    _emailFocusNode.dispose();
     _ageController.dispose();
     _heightController.dispose();
     _weightController.dispose();
@@ -100,6 +118,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     ref.read(homeTabIndexProvider.notifier).state = 0;
     await ref.read(authNotifierProvider.notifier).register(request);
+
+    if (mounted && ref.read(authNotifierProvider).hasError) {
+      setState(() {
+        _currentStep = 0;
+      });
+    }
   }
 
   bool _isAlreadyRegisteredError(dynamic error) {
@@ -109,7 +133,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         lower.contains('exist') ||
         lower.contains('registered') ||
         lower.contains('duplicate') ||
-        lower.contains('409');
+        lower.contains('in use') ||
+        lower.contains('taken') ||
+        lower.contains('409') ||
+        lower.contains('400');
   }
 
   String _formatErrorMessage(dynamic error) {
@@ -121,7 +148,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         .trim();
 
     if (_isAlreadyRegisteredError(error)) {
-      return 'An account with this email address already exists. Please log in instead.';
+      return 'An account with this email address already exists. Please log in to your account or sign up with another email.';
     }
 
     if (str.contains('validateStatus')) {
@@ -306,6 +333,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                           confirmPasswordController:
                                               _confirmPasswordController,
                                           nameController: _nameController,
+                                          emailFocusNode: _emailFocusNode,
                                           onSubmitted: _nextStep,
                                         )
                                       : _currentStep == 1
@@ -335,14 +363,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 if (authState.hasError) ...[
                                   const SizedBox(height: 16),
                                   Container(
-                                    padding: const EdgeInsets.all(14),
+                                    padding: const EdgeInsets.all(16),
                                     decoration: BoxDecoration(
                                       color: const Color(0xFFFEF2F2),
-                                      borderRadius: BorderRadius.circular(16),
+                                      borderRadius: BorderRadius.circular(20),
                                       border: Border.all(
-                                        color: AppColors.error.withValues(
-                                          alpha: 0.35,
-                                        ),
+                                        color: const Color(0xFFFCA5A5),
+                                        width: 1.2,
                                       ),
                                     ),
                                     child: Column(
@@ -353,22 +380,29 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            const Icon(
-                                              Icons.error_outline_rounded,
-                                              color: AppColors.error,
-                                              size: 18,
+                                            Container(
+                                              padding: const EdgeInsets.all(6),
+                                              decoration: const BoxDecoration(
+                                                color: Color(0xFFFEE2E2),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: const Icon(
+                                                Icons.error_outline_rounded,
+                                                color: Color(0xFFDC2626),
+                                                size: 18,
+                                              ),
                                             ),
-                                            const SizedBox(width: 8),
+                                            const SizedBox(width: 10),
                                             Expanded(
                                               child: Text(
                                                 _formatErrorMessage(
                                                   authState.error,
                                                 ),
                                                 style: const TextStyle(
-                                                  fontSize: 12,
-                                                  color: AppColors.error,
+                                                  fontSize: 12.5,
+                                                  color: Color(0xFF991B1B),
                                                   fontWeight: FontWeight.w700,
-                                                  height: 1.35,
+                                                  height: 1.4,
                                                 ),
                                               ),
                                             ),
@@ -377,36 +411,114 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                         if (_isAlreadyRegisteredError(
                                           authState.error,
                                         )) ...[
-                                          const SizedBox(height: 10),
-                                          SizedBox(
-                                            width: double.infinity,
-                                            height: 36,
-                                            child: ElevatedButton.icon(
-                                              onPressed: () =>
-                                                  context.go('/login'),
-                                              icon: const Icon(
-                                                Icons.login_rounded,
-                                                size: 14,
-                                                color: Colors.white,
-                                              ),
-                                              label: const Text(
-                                                'Log In to Existing Account',
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w900,
-                                                  color: Colors.white,
+                                          const SizedBox(height: 14),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: SizedBox(
+                                                  height: 40,
+                                                  child: ElevatedButton.icon(
+                                                    onPressed: () =>
+                                                        context.go('/login'),
+                                                    icon: const Icon(
+                                                      Icons.login_rounded,
+                                                      size: 16,
+                                                      color: Colors.white,
+                                                    ),
+                                                    label: const Text(
+                                                      'Log In',
+                                                      style: TextStyle(
+                                                        fontSize: 12.5,
+                                                        fontWeight:
+                                                            FontWeight.w900,
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
+                                                    style: ElevatedButton.styleFrom(
+                                                      backgroundColor:
+                                                          const Color(
+                                                            0xFFDC2626,
+                                                          ),
+                                                      foregroundColor:
+                                                          Colors.white,
+                                                      elevation: 0,
+                                                      padding:
+                                                          const EdgeInsets.symmetric(
+                                                            horizontal: 8,
+                                                          ),
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              12,
+                                                            ),
+                                                      ),
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                    AppColors.error,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
+                                              const SizedBox(width: 10),
+                                              Expanded(
+                                                child: SizedBox(
+                                                  height: 40,
+                                                  child: OutlinedButton.icon(
+                                                    onPressed: () {
+                                                      ref
+                                                          .read(
+                                                            authNotifierProvider
+                                                                .notifier,
+                                                          )
+                                                          .clearError();
+                                                      setState(() {
+                                                        _currentStep = 0;
+                                                      });
+                                                      WidgetsBinding.instance
+                                                          .addPostFrameCallback((
+                                                            _,
+                                                          ) {
+                                                            _emailFocusNode
+                                                                .requestFocus();
+                                                          });
+                                                    },
+                                                    icon: const Icon(
+                                                      Icons.edit_rounded,
+                                                      size: 16,
+                                                      color: Color(0xFFDC2626),
+                                                    ),
+                                                    label: const Text(
+                                                      'Edit Email',
+                                                      style: TextStyle(
+                                                        fontSize: 12.5,
+                                                        fontWeight:
+                                                            FontWeight.w900,
+                                                        color: Color(
+                                                          0xFFDC2626,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    style: OutlinedButton.styleFrom(
+                                                      side: const BorderSide(
+                                                        color: Color(
+                                                          0xFFFCA5A5,
+                                                        ),
+                                                        width: 1.5,
+                                                      ),
+                                                      backgroundColor:
+                                                          Colors.white,
+                                                      padding:
+                                                          const EdgeInsets.symmetric(
+                                                            horizontal: 8,
+                                                          ),
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              12,
+                                                            ),
+                                                      ),
+                                                    ),
+                                                  ),
                                                 ),
-                                                elevation: 0,
                                               ),
-                                            ),
+                                            ],
                                           ),
                                         ],
                                       ],
