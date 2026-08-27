@@ -20,112 +20,129 @@ class BiteFloatingNavBar extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Container(
-      margin: const EdgeInsets.only(left: 14, right: 14, bottom: 20),
-      decoration: BoxDecoration(
-        borderRadius: AppRadius.pillBorder,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.12),
-            blurRadius: 28,
-            spreadRadius: 1,
-            offset: const Offset(0, 10),
-          ),
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: isDark ? 0.15 : 0.08),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: AppRadius.pillBorder,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-          child: Container(
-            height: 64,
-            decoration: BoxDecoration(
-              color: isDark
-                  ? const Color(0xFF11141E).withValues(alpha: 0.65)
-                  : Colors.white.withValues(alpha: 0.42),
-              borderRadius: AppRadius.pillBorder,
-              border: Border.all(
-                color: isDark
-                    ? const Color(0x33FFFFFF)
-                    : Colors.white.withValues(alpha: 0.75),
-                width: 1.5,
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 460),
+        child: Container(
+          margin: const EdgeInsets.only(left: 10, right: 10, bottom: 16),
+          decoration: BoxDecoration(
+            borderRadius: AppRadius.pillBorder,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.12),
+                blurRadius: 28,
+                spreadRadius: 1,
+                offset: const Offset(0, 10),
               ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildNavItem(
-                  context: context,
-                  index: 0,
-                  icon: Icons.grid_view_rounded,
-                  activeIcon: Icons.grid_view_rounded,
-                  label: 'Dashboard',
-                  isDark: isDark,
+              BoxShadow(
+                color: AppColors.primary.withValues(
+                  alpha: isDark ? 0.15 : 0.08,
                 ),
-                // Centerpiece Glowing Camera Meal Action Button (Index 1)
-                GestureDetector(
-                  onTap: () {
-                    FocusManager.instance.primaryFocus?.unfocus();
-                    onTabSelected(1);
-                    onQuickLogPressed?.call();
-                  },
-                  child: AnimatedScale(
-                    scale: selectedIndex == 1 ? 1.1 : 1.0,
-                    duration: const Duration(milliseconds: 200),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [AppColors.orangeAccent, Color(0xFFFF7700)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        shape: BoxShape.circle,
-                        border: selectedIndex == 1
-                            ? Border.all(color: Colors.white, width: 2.5)
-                            : null,
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.orangeAccent.withValues(
-                              alpha: selectedIndex == 1 ? 0.65 : 0.45,
-                            ),
-                            blurRadius: selectedIndex == 1 ? 18 : 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.add_a_photo_rounded,
-                        color: Colors.white,
-                        size: 22,
-                      ),
-                    ),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: AppRadius.pillBorder,
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+              child: Container(
+                height: 60,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF11141E).withValues(alpha: 0.65)
+                      : Colors.white.withValues(alpha: 0.42),
+                  borderRadius: AppRadius.pillBorder,
+                  border: Border.all(
+                    color: isDark
+                        ? const Color(0x33FFFFFF)
+                        : Colors.white.withValues(alpha: 0.75),
+                    width: 1.5,
                   ),
                 ),
-                _buildNavItem(
-                  context: context,
-                  index: 2,
-                  icon: Icons.chat_bubble_outline_rounded,
-                  activeIcon: Icons.chat_bubble_rounded,
-                  label: 'Chatbot',
-                  isDark: isDark,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Flexible(
+                      child: _buildNavItem(
+                        context: context,
+                        index: 0,
+                        icon: Icons.grid_view_rounded,
+                        activeIcon: Icons.grid_view_rounded,
+                        label: 'Dashboard',
+                        isDark: isDark,
+                      ),
+                    ),
+                    // Centerpiece Glowing Camera Meal Action Button (Index 1)
+                    GestureDetector(
+                      onTap: () {
+                        FocusManager.instance.primaryFocus?.unfocus();
+                        onTabSelected(1);
+                        onQuickLogPressed?.call();
+                      },
+                      child: AnimatedScale(
+                        scale: selectedIndex == 1 ? 1.1 : 1.0,
+                        duration: const Duration(milliseconds: 200),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                AppColors.orangeAccent,
+                                Color(0xFFFF7700),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            shape: BoxShape.circle,
+                            border: selectedIndex == 1
+                                ? Border.all(color: Colors.white, width: 2.5)
+                                : null,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.orangeAccent.withValues(
+                                  alpha: selectedIndex == 1 ? 0.65 : 0.45,
+                                ),
+                                blurRadius: selectedIndex == 1 ? 18 : 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.add_a_photo_rounded,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Flexible(
+                      child: _buildNavItem(
+                        context: context,
+                        index: 2,
+                        icon: Icons.chat_bubble_outline_rounded,
+                        activeIcon: Icons.chat_bubble_rounded,
+                        label: 'Chatbot',
+                        isDark: isDark,
+                      ),
+                    ),
+                    Flexible(
+                      child: _buildNavItem(
+                        context: context,
+                        index: 3,
+                        icon: Icons.person_outline_rounded,
+                        activeIcon: Icons.person_rounded,
+                        label: 'Profile',
+                        isDark: isDark,
+                      ),
+                    ),
+                  ],
                 ),
-                _buildNavItem(
-                  context: context,
-                  index: 3,
-                  icon: Icons.person_outline_rounded,
-                  activeIcon: Icons.person_rounded,
-                  label: 'Profile',
-                  isDark: isDark,
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -162,7 +179,7 @@ class BiteFloatingNavBar extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: BoxDecoration(
             color: isSelected ? activeBg : Colors.transparent,
             borderRadius: AppRadius.pillBorder,
@@ -172,17 +189,22 @@ class BiteFloatingNavBar extends StatelessWidget {
             children: [
               Icon(
                 isSelected ? activeIcon : icon,
-                size: 20,
+                size: 18,
                 color: isSelected ? activeText : inactiveText,
               ),
               if (isSelected) ...[
-                const SizedBox(width: 6),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    color: activeText,
+                const SizedBox(width: 4),
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        color: activeText,
+                      ),
+                    ),
                   ),
                 ),
               ],

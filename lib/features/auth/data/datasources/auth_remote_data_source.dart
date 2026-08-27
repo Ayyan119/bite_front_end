@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/errors/exception.dart';
@@ -103,8 +104,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   String? _extractErrorMessage(DioException e) {
-    if (e.response?.data != null && e.response?.data is Map<String, dynamic>) {
-      final data = e.response!.data as Map<String, dynamic>;
+    dynamic responseData = e.response?.data;
+    if (responseData is String) {
+      try {
+        responseData = jsonDecode(responseData);
+      } catch (_) {}
+    }
+
+    if (responseData != null && responseData is Map) {
+      final data = responseData;
       if (data.containsKey('detail')) {
         final detail = data['detail'];
         if (detail is String && detail.isNotEmpty) {
@@ -120,16 +128,33 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           return detail;
         }
         if (detail is List && detail.isNotEmpty) {
-          final first = detail.first;
-          if (first is Map) {
-            final msg = first['msg']?.toString() ?? first.toString();
-            final field =
-                (first['loc'] is List && (first['loc'] as List).isNotEmpty)
-                ? "${(first['loc'] as List).last}: "
-                : "";
-            return "$field$msg";
+          final messages = <String>[];
+          for (final item in detail) {
+            if (item is Map) {
+              final msg = item['msg']?.toString() ?? item.toString();
+              String fieldName = '';
+              if (item['loc'] is List && (item['loc'] as List).isNotEmpty) {
+                final locLast = (item['loc'] as List).last.toString();
+                if (locLast != 'body') {
+                  fieldName = locLast
+                      .replaceAll('_', ' ')
+                      .split(' ')
+                      .map(
+                        (w) => w.isNotEmpty
+                            ? '${w[0].toUpperCase()}${w.substring(1)}'
+                            : '',
+                      )
+                      .join(' ');
+                }
+              }
+              messages.add(fieldName.isNotEmpty ? '$fieldName: $msg' : msg);
+            } else if (item != null) {
+              messages.add(item.toString());
+            }
           }
-          return detail.first.toString();
+          if (messages.isNotEmpty) {
+            return messages.join('\n');
+          }
         }
       }
       if (data.containsKey('message') && data['message'] != null) {
@@ -155,7 +180,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       return 'An account with this email address already exists. Please log in or use a different email.';
     }
     if (statusCode == 422) {
-      return 'Invalid input details. Please check your information and try again.';
+      return 'Please check your information and ensure all required fields are filled correctly.';
     }
 
     if (e.type == DioExceptionType.connectionTimeout ||

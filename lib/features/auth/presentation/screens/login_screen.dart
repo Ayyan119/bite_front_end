@@ -64,11 +64,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   String _formatErrorMessage(dynamic error) {
     if (error == null) return '';
-    final str = error
+    String str = error
         .toString()
         .replaceAll('ServerException: ', '')
         .replaceAll('Exception: ', '')
         .trim();
+
+    str = str.replaceAll(RegExp(r'\s*\(status:\s*\d+\)'), '').trim();
 
     if (str.contains('validateStatus')) {
       return 'Invalid email or password. Please check your credentials and try again.';

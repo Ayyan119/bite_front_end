@@ -48,10 +48,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(authNotifierProvider.notifier).clearError();
     });
-    _emailController.addListener(_onEmailChanged);
+    _emailController.addListener(_onFieldChanged);
+    _passwordController.addListener(_onFieldChanged);
+    _confirmPasswordController.addListener(_onFieldChanged);
+    _nameController.addListener(_onFieldChanged);
+    _ageController.addListener(_onFieldChanged);
+    _heightController.addListener(_onFieldChanged);
+    _weightController.addListener(_onFieldChanged);
   }
 
-  void _onEmailChanged() {
+  void _onFieldChanged() {
     if (ref.read(authNotifierProvider).hasError) {
       ref.read(authNotifierProvider.notifier).clearError();
     }
@@ -59,7 +65,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   void dispose() {
-    _emailController.removeListener(_onEmailChanged);
+    _emailController.removeListener(_onFieldChanged);
+    _passwordController.removeListener(_onFieldChanged);
+    _confirmPasswordController.removeListener(_onFieldChanged);
+    _nameController.removeListener(_onFieldChanged);
+    _ageController.removeListener(_onFieldChanged);
+    _heightController.removeListener(_onFieldChanged);
+    _weightController.removeListener(_onFieldChanged);
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -141,11 +153,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   String _formatErrorMessage(dynamic error) {
     if (error == null) return '';
-    final str = error
+    String str = error
         .toString()
         .replaceAll('ServerException: ', '')
         .replaceAll('Exception: ', '')
         .trim();
+
+    str = str.replaceAll(RegExp(r'\s*\(status:\s*\d+\)'), '').trim();
 
     if (_isAlreadyRegisteredError(error)) {
       return 'An account with this email address already exists. Please log in to your account or sign up with another email.';

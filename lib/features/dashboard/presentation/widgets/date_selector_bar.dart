@@ -73,55 +73,68 @@ class DateSelectorBar extends ConsumerWidget {
           ),
 
           // Date Badge & Picker Trigger
-          GestureDetector(
-            onTap: () async {
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: currentDate.isAfter(todayDate)
-                    ? todayDate
-                    : currentDate,
-                firstDate: DateTime(2020),
-                lastDate: todayDate, // Cannot select future dates!
-              );
-              if (picked != null) {
-                ref.read(selectedDashboardDateProvider.notifier).state =
-                    DateTime(picked.year, picked.month, picked.day);
-              }
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-              decoration: BoxDecoration(
-                color: isToday ? AppColors.primary : const Color(0xFF1E2025),
-                borderRadius: AppRadius.pillBorder,
-                boxShadow: [
-                  BoxShadow(
-                    color:
-                        (isToday ? AppColors.primary : const Color(0xFF1E2025))
-                            .withValues(alpha: 0.2),
-                    blurRadius: 10,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.calendar_today_rounded,
-                    size: 15,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    formattedDate,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: 0.2,
+          Flexible(
+            child: GestureDetector(
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: currentDate.isAfter(todayDate)
+                      ? todayDate
+                      : currentDate,
+                  firstDate: DateTime(2020),
+                  lastDate: todayDate, // Cannot select future dates!
+                );
+                if (picked != null) {
+                  ref.read(selectedDashboardDateProvider.notifier).state =
+                      DateTime(picked.year, picked.month, picked.day);
+                }
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: isToday ? AppColors.primary : const Color(0xFF1E2025),
+                  borderRadius: AppRadius.pillBorder,
+                  boxShadow: [
+                    BoxShadow(
+                      color:
+                          (isToday
+                                  ? AppColors.primary
+                                  : const Color(0xFF1E2025))
+                              .withValues(alpha: 0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.calendar_today_rounded,
+                      size: 15,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          formattedDate,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

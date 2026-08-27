@@ -58,7 +58,9 @@ class MealTypeSelector extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         SingleChildScrollView(
+          clipBehavior: Clip.none,
           scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(vertical: 8),
           child: Row(
             children: _mealTypes.map((type) {
               final isSelected = selectedMealType.toLowerCase() == type['id'];

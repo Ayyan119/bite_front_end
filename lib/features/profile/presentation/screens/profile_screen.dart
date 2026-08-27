@@ -46,12 +46,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final topPadding =
         (kToolbarHeight + 14.0 + MediaQuery.of(context).padding.top + 8.0) *
         0.65;
+    final appBarHeight =
+        kToolbarHeight + 14.0 + MediaQuery.of(context).padding.top;
 
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
       body: profileAsync.when(
         data: (profile) {
           return RefreshIndicator(
+            edgeOffset: appBarHeight + 6.0,
+            displacement: 36.0,
             onRefresh: () async {
               await ref.read(profileNotifierProvider.notifier).fetchProfile();
             },

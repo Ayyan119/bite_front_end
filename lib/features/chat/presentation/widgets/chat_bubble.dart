@@ -19,27 +19,28 @@ ParsedMessageContent parseMessageContent(String rawText) {
     return const ParsedMessageContent(actionSteps: [], cleanAnswer: '');
   }
 
-  final RegExp stepRegex = RegExp(
-    r'^(?:(?:Retrieving|Searching|Calculating|Saving|Loading|Processing|Analyzing|Fetching|Updating)\b[^\.\n]*\.\.\.\s*)+',
+  final RegExp stepPrefixRegex = RegExp(
+    r'^(?:(?:Looking\s+up|Checking\s+for|Searching\s+for|[A-Za-z]+ing)\b[^\.\n\u2026]*(?:\.\.\.|\u2026)\s*)+',
     caseSensitive: false,
   );
 
-  final match = stepRegex.firstMatch(rawText);
+  final match = stepPrefixRegex.firstMatch(rawText);
   if (match != null) {
     final stepsString = match.group(0)!;
     final cleanAnswer = rawText.substring(match.end).trim();
 
-    final steps = stepsString
-        .split('...')
-        .map((s) => s.trim())
+    final RegExp individualStepRegex = RegExp(
+      r'(?:Looking\s+up|Checking\s+for|Searching\s+for|[A-Za-z]+ing)\b[^\.\n\u2026]*(?:\.\.\.|\u2026)',
+      caseSensitive: false,
+    );
+
+    final steps = individualStepRegex
+        .allMatches(stepsString)
+        .map((m) => m.group(0)!.trim())
         .where((s) => s.isNotEmpty)
-        .map((s) => '$s...')
         .toList();
 
-    return ParsedMessageContent(
-      actionSteps: steps,
-      cleanAnswer: cleanAnswer.isNotEmpty ? cleanAnswer : rawText,
-    );
+    return ParsedMessageContent(actionSteps: steps, cleanAnswer: cleanAnswer);
   }
 
   return ParsedMessageContent(actionSteps: const [], cleanAnswer: rawText);

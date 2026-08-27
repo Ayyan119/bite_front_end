@@ -54,10 +54,14 @@ class DashboardScreen extends ConsumerWidget {
     final topPadding =
         (kToolbarHeight + 14.0 + MediaQuery.of(context).padding.top + 8.0) *
         0.65;
+    final appBarHeight =
+        kToolbarHeight + 14.0 + MediaQuery.of(context).padding.top;
 
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
       body: RefreshIndicator(
+        edgeOffset: appBarHeight + 6.0,
+        displacement: 36.0,
         color: AppColors.secondary,
         backgroundColor: Colors.white,
         onRefresh: () async {

@@ -215,6 +215,7 @@ class _EditProfileBottomSheetState
                   Expanded(
                     child: TextFormField(
                       controller: _ageController,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       keyboardType: TextInputType.number,
                       style: const TextStyle(
                         color: Color(0xFF0F172A),
@@ -238,16 +239,26 @@ class _EditProfileBottomSheetState
                           ),
                         ),
                       ),
-                      validator: (val) => (int.tryParse(val ?? '') ?? 0) <= 0
-                          ? 'Invalid'
-                          : null,
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) {
+                          return 'Required';
+                        }
+                        final age = int.tryParse(val.trim());
+                        if (age == null || age < 10 || age > 120) {
+                          return '10–120 yrs';
+                        }
+                        return null;
+                      },
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: TextFormField(
                       controller: _heightController,
-                      keyboardType: TextInputType.number,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       style: const TextStyle(
                         color: Color(0xFF0F172A),
                         fontWeight: FontWeight.w700,
@@ -270,15 +281,25 @@ class _EditProfileBottomSheetState
                           ),
                         ),
                       ),
-                      validator: (val) => (double.tryParse(val ?? '') ?? 0) <= 0
-                          ? 'Invalid'
-                          : null,
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) {
+                          return 'Required';
+                        }
+                        final h = double.tryParse(val.trim());
+                        if (h == null) return 'In cm';
+                        if (h < 50.0 || h > 250.0) {
+                          if (h < 50.0) return 'In cm (50+)';
+                          return '50–250 cm';
+                        }
+                        return null;
+                      },
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: TextFormField(
                       controller: _weightController,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
@@ -304,9 +325,17 @@ class _EditProfileBottomSheetState
                           ),
                         ),
                       ),
-                      validator: (val) => (double.tryParse(val ?? '') ?? 0) <= 0
-                          ? 'Invalid'
-                          : null,
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) {
+                          return 'Required';
+                        }
+                        final w = double.tryParse(val.trim());
+                        if (w == null) return 'In kg';
+                        if (w < 20.0 || w > 300.0) {
+                          return '20–300 kg';
+                        }
+                        return null;
+                      },
                     ),
                   ),
                 ],

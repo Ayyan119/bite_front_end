@@ -274,14 +274,32 @@ class _TopMicronutrientsCardState extends State<TopMicronutrientsCard> {
   MicroCategory _categorizeKey(String rawKey) {
     final key = rawKey.toLowerCase();
 
-    // Fatty Acids (SFA, MUFA, PUFA)
+    // Hydration (Water, Fluid, Moisture, Hydration, H2O, Liquid, Beverage, Drink)
+    if (key.contains('water') ||
+        key.contains('fluid') ||
+        key.contains('moisture') ||
+        key.contains('hydration') ||
+        key.contains('h2o') ||
+        key.contains('liquid') ||
+        key.contains('beverage') ||
+        key.contains('drink')) {
+      return MicroCategory.hydration;
+    }
+
+    // Fatty Acids (SFA, MUFA, PUFA, Saturated, Monounsaturated, Polyunsaturated, Lipids, Trans, Omega, Cholesterol, Fatty)
     if (key.contains('sfa') ||
         key.contains('mufa') ||
         key.contains('pufa') ||
+        key.contains('sat') ||
+        key.contains('saturated') ||
+        key.contains('monounsat') ||
+        key.contains('polyunsat') ||
         key.contains('trans') ||
         key.contains('omega') ||
         key.contains('cholesterol') ||
-        key.contains('fatty')) {
+        key.contains('fatty') ||
+        key.contains('lipid') ||
+        key.contains('fat')) {
       return MicroCategory.fats;
     }
 
@@ -320,13 +338,6 @@ class _TopMicronutrientsCardState extends State<TopMicronutrientsCard> {
         key.contains('manganese') ||
         key.contains('iodine')) {
       return MicroCategory.minerals;
-    }
-
-    // Hydration
-    if (key.contains('water') ||
-        key.contains('fluid') ||
-        key.contains('moisture')) {
-      return MicroCategory.hydration;
     }
 
     return MicroCategory.vitamins; // Default fallback to vitamins category

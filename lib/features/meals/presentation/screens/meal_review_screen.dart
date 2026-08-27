@@ -103,11 +103,10 @@ class _MealReviewScreenState extends ConsumerState<MealReviewScreen>
     final canConfirm = hasItems && !isCommitting;
 
     final topPadding =
-        (kToolbarHeight +
-            14.0 +
-            MediaQuery.of(context).padding.top +
-            AppSpacing.sm) *
-        0.65;
+        kToolbarHeight +
+        14.0 +
+        MediaQuery.of(context).padding.top +
+        AppSpacing.md;
 
     return Scaffold(
       backgroundColor: AppColors.lightBackground,

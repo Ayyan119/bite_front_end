@@ -45,6 +45,7 @@ class RegisterStepBody extends StatelessWidget {
         // Age Field (Empty by default)
         TextFormField(
           controller: ageController,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           keyboardType: TextInputType.number,
           style: const TextStyle(
             color: Color(0xFF0F172A),
@@ -92,9 +93,9 @@ class RegisterStepBody extends StatelessWidget {
             if (value == null || value.trim().isEmpty) {
               return null; // Optional if skipped
             }
-            final ageNum = int.tryParse(value);
-            if (ageNum == null || ageNum <= 0 || ageNum > 120) {
-              return 'Please enter a valid age';
+            final ageNum = int.tryParse(value.trim());
+            if (ageNum == null || ageNum < 10 || ageNum > 120) {
+              return 'Age must be 10 – 120 yrs';
             }
             return null;
           },
@@ -112,25 +113,31 @@ class RegisterStepBody extends StatelessWidget {
         const SizedBox(height: 8),
         Row(
           children: [
-            _GenderChip(
-              label: 'Male',
-              value: 'male',
-              selectedGroup: gender,
-              onSelected: onGenderChanged,
+            Expanded(
+              child: _GenderChip(
+                label: 'Male',
+                value: 'male',
+                selectedGroup: gender,
+                onSelected: onGenderChanged,
+              ),
             ),
-            const SizedBox(width: 8),
-            _GenderChip(
-              label: 'Female',
-              value: 'female',
-              selectedGroup: gender,
-              onSelected: onGenderChanged,
+            const SizedBox(width: 6),
+            Expanded(
+              child: _GenderChip(
+                label: 'Female',
+                value: 'female',
+                selectedGroup: gender,
+                onSelected: onGenderChanged,
+              ),
             ),
-            const SizedBox(width: 8),
-            _GenderChip(
-              label: 'Other',
-              value: 'other',
-              selectedGroup: gender,
-              onSelected: onGenderChanged,
+            const SizedBox(width: 6),
+            Expanded(
+              child: _GenderChip(
+                label: 'Other',
+                value: 'other',
+                selectedGroup: gender,
+                onSelected: onGenderChanged,
+              ),
             ),
           ],
         ),
@@ -142,26 +149,32 @@ class RegisterStepBody extends StatelessWidget {
             Expanded(
               child: TextFormField(
                 controller: heightController,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
                 style: const TextStyle(
                   color: Color(0xFF0F172A),
                   fontWeight: FontWeight.w700,
-                  fontSize: 14,
+                  fontSize: 13,
                 ),
                 decoration: InputDecoration(
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 14,
+                  ),
                   labelText: 'Height (cm)',
                   labelStyle: const TextStyle(
                     color: Color(0xFF64748B),
                     fontWeight: FontWeight.w700,
-                    fontSize: 13,
+                    fontSize: 12,
                   ),
                   hintText: 'e.g. 175.0',
                   prefixIcon: const Icon(
                     Icons.straighten_rounded,
                     color: AppColors.secondary,
-                    size: 20,
+                    size: 18,
                   ),
                   filled: true,
                   fillColor: const Color(0xFFF8FAFC),
@@ -191,38 +204,50 @@ class RegisterStepBody extends StatelessWidget {
                   if (value == null || value.trim().isEmpty) {
                     return null; // Optional if skipped
                   }
-                  final h = double.tryParse(value);
-                  if (h == null || h <= 0 || h > 300) {
-                    return 'Invalid height';
+                  final h = double.tryParse(value.trim());
+                  if (h == null) {
+                    return 'Enter height in cm';
+                  }
+                  if (h < 50.0 || h > 250.0) {
+                    if (h < 50.0) {
+                      return 'Must be in cm (50–250 cm)';
+                    }
+                    return 'Must be 50–250 cm';
                   }
                   return null;
                 },
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             Expanded(
               child: TextFormField(
                 controller: weightController,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
                 style: const TextStyle(
                   color: Color(0xFF0F172A),
                   fontWeight: FontWeight.w700,
-                  fontSize: 14,
+                  fontSize: 13,
                 ),
                 decoration: InputDecoration(
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 14,
+                  ),
                   labelText: 'Weight (kg)',
                   labelStyle: const TextStyle(
                     color: Color(0xFF64748B),
                     fontWeight: FontWeight.w700,
-                    fontSize: 13,
+                    fontSize: 12,
                   ),
                   hintText: 'e.g. 70.0',
                   prefixIcon: const Icon(
                     Icons.monitor_weight_outlined,
                     color: AppColors.secondary,
-                    size: 20,
+                    size: 18,
                   ),
                   filled: true,
                   fillColor: const Color(0xFFF8FAFC),
@@ -252,9 +277,12 @@ class RegisterStepBody extends StatelessWidget {
                   if (value == null || value.trim().isEmpty) {
                     return null; // Optional if skipped
                   }
-                  final w = double.tryParse(value);
-                  if (w == null || w <= 0 || w > 500) {
-                    return 'Invalid weight';
+                  final w = double.tryParse(value.trim());
+                  if (w == null) {
+                    return 'Enter weight in kg';
+                  }
+                  if (w < 20.0 || w > 300.0) {
+                    return 'Must be 20–300 kg';
                   }
                   return null;
                 },
@@ -285,12 +313,17 @@ class _GenderChip extends StatelessWidget {
     final isSelected = value == selectedGroup;
 
     return ChoiceChip(
-      label: Text(
-        label,
-        style: TextStyle(
-          color: isSelected ? AppColors.secondary : const Color(0xFF0F172A),
-          fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
-          fontSize: 13,
+      label: Center(
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? AppColors.secondary : const Color(0xFF0F172A),
+              fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+              fontSize: 13,
+            ),
+          ),
         ),
       ),
       selected: isSelected,
@@ -304,7 +337,7 @@ class _GenderChip extends StatelessWidget {
           width: isSelected ? 2 : 1.2,
         ),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
     );
   }
 }

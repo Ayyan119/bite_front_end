@@ -41,24 +41,30 @@ class _HistoricalAnalyticsChartState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Row(
-                children: [
-                  Icon(
-                    Icons.grid_view_rounded,
-                    color: AppColors.primary,
-                    size: 22,
-                  ),
-                  SizedBox(width: AppSpacing.sm),
-                  Text(
-                    'Macro Trends',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.lightTextPrimary,
+              const Expanded(
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.grid_view_rounded,
+                      color: AppColors.primary,
+                      size: 22,
                     ),
-                  ),
-                ],
+                    SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        'Macro Trends',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.lightTextPrimary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               _RangeSegmentSwitcher(
                 selectedDays: selectedDays,
                 onDaysSelected: (days) {
@@ -189,77 +195,82 @@ class _HistoricalAnalyticsChartState
                         const SizedBox(height: AppSpacing.md),
 
                         // Legend Row: Less -> Empty -> Dull -> Medium -> Bright -> Red -> More
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Logged: $loggedDaysCount/$selectedDays days',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                color: isDark
-                                    ? AppColors.darkTextSecondary
-                                    : AppColors.lightTextMuted,
-                              ),
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  'Empty',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: isDark
-                                        ? AppColors.darkTextSecondary
-                                        : AppColors.lightTextMuted,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                _LegendBox(
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Logged: $loggedDaysCount/$selectedDays days',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
                                   color: isDark
-                                      ? const Color(0xFF1E293B)
-                                      : const Color(0xFFF1F5F9),
-                                  borderColor: isDark
-                                      ? const Color(0xFF334155)
-                                      : const Color(0xFFCBD5E1),
-                                  tooltip: 'Empty / No meal logged',
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.lightTextMuted,
                                 ),
-                                const SizedBox(width: 4),
-                                _LegendBox(
-                                  color: _getMetricBaseColor(
-                                    selectedMetric,
-                                  ).withValues(alpha: 0.35),
-                                  tooltip: 'Low intake (<60%)',
-                                ),
-                                const SizedBox(width: 4),
-                                _LegendBox(
-                                  color: _getMetricBaseColor(
-                                    selectedMetric,
-                                  ).withValues(alpha: 0.65),
-                                  tooltip: 'Moderate intake (60-90%)',
-                                ),
-                                const SizedBox(width: 4),
-                                _LegendBox(
-                                  color: _getMetricBaseColor(selectedMetric),
-                                  tooltip: 'Bright Target Complete (90-115%)',
-                                ),
-                                const SizedBox(width: 4),
-                                const _LegendBox(
-                                  color: Color(0xFFEF4444),
-                                  tooltip: 'Red Overflow Target (>115%)',
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'Overflow',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: isDark
-                                        ? AppColors.darkTextSecondary
-                                        : AppColors.lightTextMuted,
+                              ),
+                              const SizedBox(width: 12),
+                              Row(
+                                children: [
+                                  Text(
+                                    'Empty',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: isDark
+                                          ? AppColors.darkTextSecondary
+                                          : AppColors.lightTextMuted,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ],
+                                  const SizedBox(width: 4),
+                                  _LegendBox(
+                                    color: isDark
+                                        ? const Color(0xFF1E293B)
+                                        : const Color(0xFFF1F5F9),
+                                    borderColor: isDark
+                                        ? const Color(0xFF334155)
+                                        : const Color(0xFFCBD5E1),
+                                    tooltip: 'Empty / No meal logged',
+                                  ),
+                                  const SizedBox(width: 4),
+                                  _LegendBox(
+                                    color: _getMetricBaseColor(
+                                      selectedMetric,
+                                    ).withValues(alpha: 0.35),
+                                    tooltip: 'Low intake (<60%)',
+                                  ),
+                                  const SizedBox(width: 4),
+                                  _LegendBox(
+                                    color: _getMetricBaseColor(
+                                      selectedMetric,
+                                    ).withValues(alpha: 0.65),
+                                    tooltip: 'Moderate intake (60-90%)',
+                                  ),
+                                  const SizedBox(width: 4),
+                                  _LegendBox(
+                                    color: _getMetricBaseColor(selectedMetric),
+                                    tooltip: 'Bright Target Complete (90-115%)',
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const _LegendBox(
+                                    color: Color(0xFFEF4444),
+                                    tooltip: 'Red Overflow Target (>115%)',
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Overflow',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: isDark
+                                          ? AppColors.darkTextSecondary
+                                          : AppColors.lightTextMuted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -395,9 +406,16 @@ class _HistoricalAnalyticsChartState
   ) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        final availableWidth = constraints.maxWidth;
+        final itemsPerRow = availableWidth < 300 ? 5 : 6;
+        const spacing = 6.0;
+        final boxSize =
+            ((availableWidth - ((itemsPerRow - 1) * spacing)) / itemsPerRow)
+                .clamp(20.0, 32.0);
+
         return Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: spacing,
+          runSpacing: spacing,
           children: items.map((item) {
             final isSelected = _selectedItem?.date == item.date;
             final status = _getMetricStatus(item, metric);
@@ -419,8 +437,8 @@ class _HistoricalAnalyticsChartState
                 message: _buildShortDateTooltip(item.date),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
-                  width: 28,
-                  height: 28,
+                  width: boxSize,
+                  height: boxSize,
                   decoration: BoxDecoration(
                     color: color,
                     borderRadius: BorderRadius.circular(6),
